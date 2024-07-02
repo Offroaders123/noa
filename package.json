@@ -39,6 +39,7 @@
         "@babylonjs/core": "^6.1.0"
     },
     "devDependencies": {
+        "@types/box-intersect": "^1.0.3",
         "eslint": "^8.3.0",
         "js-beautify": "^1.14.0",
         "typedoc": "^0.24.6",

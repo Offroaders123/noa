@@ -25,7 +25,7 @@ export class PositionState {
         this._renderPosition = null
 
         /** [lo,lo,lo, hi,hi,hi] in LOCAL COORDS
-         * @type {null | number[]} */
+         * @type {null | [lo: number, lo: number, lo: number, hi: number, hi: number, hi: number]} */
         this._extents = null
     }
 }

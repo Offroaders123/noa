@@ -22,8 +22,14 @@ import boxIntersect from 'box-intersect'
 
 
 
+/**
+ * @param {import('../index.js').Engine} noa
+ */
 export default function (noa) {
 
+    /**
+     * @type {[lo: number, lo: number, lo: number, hi: number, hi: number, hi: number][]}
+     */
     var intervals = []
 
     return {
@@ -80,6 +86,12 @@ export default function (noa) {
      */
 
 
+    /**
+     * @param {import("../index.js").Engine} noa
+     * @param stateA
+     * @param stateB
+     * @returns {void}
+     */
     function handleCollision(noa, stateA, stateB) {
         var idA = stateA.__id
         var idB = stateB.__id
@@ -101,6 +113,13 @@ export default function (noa) {
     // For entities whose extents overlap, 
     // test if collision still happens when taking cylinder flags into account
 
+    /**
+     * @param stateA
+     * @param stateB
+     * @param {[lo: number, lo: number, lo: number, hi: number, hi: number, hi: number]} intervalA
+     * @param {[lo: number, lo: number, lo: number, hi: number, hi: number, hi: number]} intervalB
+     * @returns {boolean}
+     */
     function cylindricalHitTest(stateA, stateB, intervalA, intervalB) {
         if (stateA.cylinder) {
             if (stateB.cylinder) {
@@ -120,6 +139,11 @@ export default function (noa) {
     // Cylinder-cylinder hit test (AABBs are known to overlap)
     // given their extent arrays [lo, lo, lo, hi, hi, hi]
 
+    /**
+     * @param {[lo: number, lo: number, lo: number, hi: number, hi: number, hi: number]} a
+     * @param {[lo: number, lo: number, lo: number, hi: number, hi: number, hi: number]} b
+     * @returns {boolean}
+     */
     function cylinderCylinderTest(a, b) {
         // distance between cylinder centers
         var rada = (a[3] - a[0]) / 2
@@ -138,6 +162,11 @@ export default function (noa) {
     // Cylinder-Box hit test (AABBs are known to overlap)
     // given their extent arrays [lo, lo, lo, hi, hi, hi]
 
+    /**
+     * @param {[lo: number, lo: number, lo: number, hi: number, hi: number, hi: number]} cyl
+     * @param {[lo: number, lo: number, lo: number, hi: number, hi: number, hi: number]} cube
+     * @returns {boolean}
+     */
     function cylinderBoxTest(cyl, cube) {
         // X-z center of cylinder
         var rad = (cyl[3] - cyl[0]) / 2
@@ -153,6 +182,12 @@ export default function (noa) {
         return (distsq <= rad * rad)
     }
 
+    /**
+     * @param {number} val
+     * @param {number} lo
+     * @param {number} hi
+     * @returns {number}
+     */
     function clamp(val, lo, hi) {
         return (val < lo) ? lo : (val > hi) ? hi : val
     }
