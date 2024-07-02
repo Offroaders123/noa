@@ -20,7 +20,11 @@ import { locationHasher, removeUnorderedListItem } from './util'
 /** @internal */
 export class SceneOctreeManager {
 
-    /** @internal */
+    /**
+     * @internal
+     * @param {import("./rendering.js").Rendering} rendering
+     * @param {number} blockSize
+     */
     constructor(rendering, blockSize) {
         var scene = rendering.scene
         scene._addComponent(new OctreeSceneComponent(scene))
@@ -34,6 +38,7 @@ export class SceneOctreeManager {
         var octree = new Octree(NOP)
         scene._selectionOctree = octree
         octree.blocks = []
+        /** @type {Record<string, unknown>} */
         var octBlocksHash = {}
 
 
@@ -43,8 +48,14 @@ export class SceneOctreeManager {
          * 
         */
 
-        this.rebase = (offset) => { recurseRebaseBlocks(octree, offset) }
+        this.rebase = (/** @type {Vector3} */ offset) => { recurseRebaseBlocks(octree, offset) }
 
+        /**
+         * @param mesh
+         * @param isStatic
+         * @param {[number, number, number]} pos
+         * @param chunk
+         */
         this.addMesh = (mesh, isStatic, pos, chunk) => {
             if (!mesh.metadata) mesh.metadata = {}
 
@@ -87,6 +98,10 @@ export class SceneOctreeManager {
 
 
 
+        /**
+         * @param mesh
+         * @returns {void}
+         */
         this.removeMesh = (mesh) => {
             if (!mesh.metadata) return
 
@@ -111,6 +126,10 @@ export class SceneOctreeManager {
 
 
         // experimental helper
+        /**
+         * @param mesh
+         * @returns {void}
+         */
         this.setMeshVisibility = (mesh, visible = false) => {
             if (mesh.metadata[octreeBlock]) {
                 // mesh is static
@@ -145,6 +164,11 @@ export class SceneOctreeManager {
         var NOP = () => { }
         var bs = blockSize * rendering.noa.world._chunkSize
 
+        /**
+         * @param {Octree | OctreeBlock} parent
+         * @param {Vector3} offset
+         * @returns {void}
+         */
         var recurseRebaseBlocks = (parent, offset) => {
             parent.blocks.forEach(child => {
                 child.minPoint.subtractInPlace(offset)
@@ -154,6 +178,11 @@ export class SceneOctreeManager {
             })
         }
 
+        /**
+         * @param {number[]} minPt
+         * @param {number} size
+         * @returns {OctreeBlock}
+         */
         var makeOctreeBlock = (minPt, size) => {
             var min = new Vector3(minPt[0], minPt[1], minPt[2])
             var max = new Vector3(minPt[0] + size, minPt[1] + size, minPt[2] + size)
