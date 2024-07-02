@@ -3,6 +3,8 @@ import { Engine } from '@babylonjs/core/Engines/engine'
 import { Texture } from '@babylonjs/core/Materials/Textures/texture'
 import { MaterialPluginBase } from '@babylonjs/core/Materials/materialPluginBase'
 import { RawTexture2DArray } from '@babylonjs/core/Materials/Textures/rawTexture2DArray'
+import { Material } from '@babylonjs/core/Materials/material.js'
+import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial.js'
 
 /**
  * 
@@ -28,8 +30,11 @@ export class TerrainMatManager {
         // internals
         this.noa = noa
         this._idCounter = 1000
+        /** @type {Record<number, number>} */
         this._blockMatIDtoTerrainID = {}
+        /** @type {Record<number, StandardMaterial>} */
         this._terrainIDtoMatObject = {}
+        /** @type {Record<string, number>} */
         this._texURLtoTerrainID = {}
         this._renderMatToTerrainID = new Map()
     }
@@ -43,6 +48,8 @@ export class TerrainMatManager {
      * the same meshes.
      * Internally, this accessor also creates the material for each 
      * terrainMatID as they are first encountered.
+     * @param {number} blockMatID
+     * @returns {number}
      */
 
     getTerrainMatId(blockMatID) {
@@ -66,6 +73,7 @@ export class TerrainMatManager {
 
     /**
      * Get a Babylon Material object, given a terrainMatID (gotten from this module)
+     * @returns {StandardMaterial}
      */
     getMaterial(terrainMatID = 1) {
         return this._terrainIDtoMatObject[terrainMatID]
@@ -91,6 +99,7 @@ export class TerrainMatManager {
 /** 
  * Decide a unique terrainID, based on block material ID properties
  * @param {TerrainMatManager} self 
+ * @returns {number}
 */
 function decideTerrainMatID(self, blockMatID = 0) {
     var matInfo = self.noa.registry.getMaterialData(blockMatID)
@@ -125,6 +134,7 @@ function decideTerrainMatID(self, blockMatID = 0) {
 /** 
  * Create (choose) a material for a given set of block material properties
  * @param {TerrainMatManager} self 
+ * @returns {StandardMaterial}
 */
 function createTerrainMat(self, blockMatID = 0) {
     var matInfo = self.noa.registry.getMaterialData(blockMatID)
@@ -183,6 +193,10 @@ function createTerrainMat(self, blockMatID = 0) {
 */
 
 class TerrainMaterialPlugin extends MaterialPluginBase {
+    /**
+     * @param {Material} material
+     * @param {Texture} texture
+     */
     constructor(material, texture) {
         var priority = 200
         var defines = { 'NOA_TWOD_ARRAY_TEXTURE': false }
@@ -195,6 +209,10 @@ class TerrainMaterialPlugin extends MaterialPluginBase {
         })
     }
 
+    /**
+     * @param {Texture} texture
+     * @returns {void}
+     */
     setTextureArrayData(texture) {
         var { width, height } = texture.getSize()
         var numLayers = Math.round(height / width)
@@ -213,32 +231,68 @@ class TerrainMaterialPlugin extends MaterialPluginBase {
         )
     }
 
+    /**
+     * @override
+     * @param defines
+     * @param scene
+     * @param mesh
+     * @returns {void}
+     */
     prepareDefines(defines, scene, mesh) {
         defines['NOA_TWOD_ARRAY_TEXTURE'] = true
     }
 
+    /**
+     * @override
+     * @returns {string}
+     */
     getClassName() {
         return 'TerrainMaterialPluginName'
     }
 
+    /**
+     * @override
+     * @param {string[]} samplers
+     * @returns {void}
+     */
     getSamplers(samplers) {
         samplers.push('atlasTexture')
     }
 
+    /**
+     * @override
+     * @param {string[]} attributes
+     * @returns {void}
+     */
     getAttributes(attributes) {
         attributes.push('texAtlasIndices')
     }
 
+    /**
+     * @override
+     */
     getUniforms() {
         return { ubo: [] }
     }
 
+    /**
+     * @override
+     * @param uniformBuffer
+     * @param scene
+     * @param engine
+     * @param subMesh
+     * @returns {void}
+     */
     bindForSubMesh(uniformBuffer, scene, engine, subMesh) {
         if (this._atlasTextureArray) {
             uniformBuffer.setTexture('atlasTexture', this._atlasTextureArray)
         }
     }
 
+    /**
+     * @override
+     * @param {string} shaderType
+     */
     getCustomCode(shaderType) {
         if (shaderType === 'vertex') return {
             'CUSTOM_VERTEX_MAIN_BEGIN': `
