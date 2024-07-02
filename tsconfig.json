@@ -30,6 +30,15 @@
         // "moduleResolution": "Node",
         // "downlevelIteration": true,
         // "useDefineForClassFields": false,
+        "strict": true,
+        "strictNullChecks": false, // temp
+        "noImplicitOverride": true,
+        // "noPropertyAccessFromIndexSignature": true,
+        // "noUncheckedIndexedAccess": true,
+        "allowUnreachableCode": false,
+        "noUnusedLocals": true,
+        "allowUnusedLabels": false,
+        "noUnusedParameters": true
     },
     "typeAcquisition": {
         "exclude": [
