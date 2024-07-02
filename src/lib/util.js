@@ -3,6 +3,12 @@
 
 
 // helper to swap item to end and pop(), instead of splice()ing
+/**
+ * @template T
+ * @param {T[]} list
+ * @param {T} item
+ * @returns {void}
+ */
 export function removeUnorderedListItem(list, item) {
     var i = list.indexOf(item)
     if (i < 0) return
@@ -20,6 +26,10 @@ export function removeUnorderedListItem(list, item) {
 
 
 // ....
+/**
+ * @param {number} rad
+ * @returns {number}
+ */
 export function numberOfVoxelsInSphere(rad) {
     if (rad === prevRad) return prevAnswer
     var ext = Math.ceil(rad), ct = 0, rsq = rad * rad
@@ -43,6 +53,14 @@ var prevRad = 0, prevAnswer = 0
 
 // partly "unrolled" loops to copy contents of ndarrays
 // when there's no source, zeroes out the array instead
+/**
+ * @param {number} src
+ * @param tgt
+ * @param pos
+ * @param {number[]} size
+ * @param tgtPos
+ * @returns {void}
+ */
 export function copyNdarrayContents(src, tgt, pos, size, tgtPos) {
     if (typeof src === 'number') {
         doNdarrayFill(src, tgt, tgtPos[0], tgtPos[1], tgtPos[2],
@@ -52,6 +70,20 @@ export function copyNdarrayContents(src, tgt, pos, size, tgtPos) {
             size[0], size[1], size[2], tgtPos[0], tgtPos[1], tgtPos[2])
     }
 }
+/**
+ * @param src
+ * @param tgt
+ * @param {number} i0
+ * @param {number} j0
+ * @param k0
+ * @param {number} si
+ * @param {number} sj
+ * @param {number} sk
+ * @param {number} ti
+ * @param {number} tj
+ * @param tk
+ * @returns {void}
+ */
 function doNdarrayCopy(src, tgt, i0, j0, k0, si, sj, sk, ti, tj, tk) {
     var sdx = src.stride[2]
     var tdx = tgt.stride[2]
@@ -68,6 +100,17 @@ function doNdarrayCopy(src, tgt, i0, j0, k0, si, sj, sk, ti, tj, tk) {
     }
 }
 
+/**
+ * @param {number} value
+ * @param tgt
+ * @param {number} i0
+ * @param {number} j0
+ * @param k0
+ * @param {number} si
+ * @param {number} sj
+ * @param {number} sk
+ * @returns {void}
+ */
 function doNdarrayFill(value, tgt, i0, j0, k0, si, sj, sk) {
     var dx = tgt.stride[2]
     for (var i = 0; i < si; i++) {
@@ -87,6 +130,13 @@ function doNdarrayFill(value, tgt, i0, j0, k0, si, sj, sk) {
 // iterates over 3D positions a given manhattan distance from (0,0,0)
 // and exit early if the callback returns true
 // skips locations beyond a horiz or vertical max distance
+/**
+ * @param {number} d
+ * @param {number} xmax
+ * @param {number} ymax
+ * @param {(x: number, d: number, z: number) => boolean} cb
+ * @returns {boolean}
+ */
 export function iterateOverShellAtDistance(d, xmax, ymax, cb) {
     if (d === 0) return cb(0, 0, 0)
     // larger top/bottom planes of current shell
@@ -122,6 +172,12 @@ export function iterateOverShellAtDistance(d, xmax, ymax, cb) {
 // function to hash three indexes (i,j,k) into one integer
 // note that hash wraps around every 1024 indexes.
 //      i.e.:   hash(1, 1, 1) === hash(1025, 1, -1023)
+/**
+ * @param {number} i
+ * @param {number} j
+ * @param {number} k
+ * @returns {number}
+ */
 export function locationHasher(i, j, k) {
     return (i & 1023)
         | ((j & 1023) << 10)
@@ -140,17 +196,26 @@ export function locationHasher(i, j, k) {
 /** @internal */
 export class ChunkStorage {
     constructor() {
+        /** @type {Record<string, import('./chunk.js').Chunk>} */
         this.hash = {}
     }
 
-    /** @returns {import('./chunk').Chunk} */
+    /**
+     * @returns {import('./chunk').Chunk | null}
+     */
     getChunkByIndexes(i = 0, j = 0, k = 0) {
         return this.hash[locationHasher(i, j, k)] || null
     }
-    /** @param {import('./chunk').Chunk} chunk */
+    /**
+     * @param {import('./chunk').Chunk} chunk
+     * @returns {void}
+     */
     storeChunkByIndexes(i = 0, j = 0, k = 0, chunk) {
         this.hash[locationHasher(i, j, k)] = chunk
     }
+    /**
+     * @returns {void}
+     */
     removeChunkByIndexes(i = 0, j = 0, k = 0) {
         delete this.hash[locationHasher(i, j, k)]
     }
@@ -172,16 +237,35 @@ export class ChunkStorage {
 /** @internal */
 export class LocationQueue {
     constructor() {
+        /** @type {[number, number, number, number][]} */
         this.arr = []
+        /** @type {Record<string, boolean>} */
         this.hash = {}
     }
+    /**
+     * @param {(value: [number, number, number, number], index: number, array: [number, number, number, number][]) => void} cb
+     * @param {any} [thisArg]
+     * @returns {void}
+     */
     forEach(cb, thisArg) {
         this.arr.forEach(cb, thisArg)
     }
+    /**
+     * @param {number} i
+     * @param {number} j
+     * @param {number} k
+     * @returns {boolean}
+     */
     includes(i, j, k) {
         var id = locationHasher(i, j, k)
         return !!this.hash[id]
     }
+    /**
+     * @param {number} i
+     * @param {number} j
+     * @param {number} k
+     * @returns {void}
+     */
     add(i, j, k, toFront = false) {
         var id = locationHasher(i, j, k)
         if (this.hash[id]) return
@@ -192,11 +276,21 @@ export class LocationQueue {
         }
         this.hash[id] = true
     }
+    /**
+     * @param {number} ix
+     * @returns {void}
+     */
     removeByIndex(ix) {
         var el = this.arr[ix]
         delete this.hash[el[3]]
         this.arr.splice(ix, 1)
     }
+    /**
+     * @param {number} i
+     * @param {number} j
+     * @param {number} k
+     * @returns {void}
+     */
     remove(i, j, k) {
         var id = locationHasher(i, j, k)
         if (!this.hash[id]) return
@@ -209,29 +303,56 @@ export class LocationQueue {
         }
         throw 'internal bug with location queue - hash value overlapped'
     }
+    /**
+     * @returns {number}
+     */
     count() { return this.arr.length }
+    /**
+     * @returns {boolean}
+     */
     isEmpty() { return (this.arr.length === 0) }
+    /**
+     * @returns {void}
+     */
     empty() {
         this.arr = []
         this.hash = {}
     }
+    /**
+     * @returns {typeof this.arr[number]}
+     */
     pop() {
         var el = this.arr.pop()
         delete this.hash[el[3]]
         return el
     }
+    /**
+     * @param {LocationQueue} queue
+     * @returns {void}
+     */
     copyFrom(queue) {
         this.arr = queue.arr.slice()
         this.hash = {}
         for (var key in queue.hash) this.hash[key] = true
     }
+    /**
+     * @param {(i: number, j: number, k: number) => number} locToDist
+     * @returns {void}
+     */
     sortByDistance(locToDist, reverse = false) {
         sortLocationArrByDistance(this.arr, locToDist, reverse)
     }
 }
 
 // internal helper for preceding class
+/**
+ * @param {[number, number, number, number][]} arr
+ * @param {(i: number, j: number, k: number) => number} distFn
+ * @param {boolean} reverse
+ * @returns {void}
+ */
 function sortLocationArrByDistance(arr, distFn, reverse) {
+    /** @type {Record<string, number>} */
     var hash = {}
     for (var loc of arr) {
         hash[loc[3]] = distFn(loc[0], loc[1], loc[2])
@@ -255,8 +376,14 @@ function sortLocationArrByDistance(arr, distFn, reverse) {
 
 
 // simple thing for reporting time split up between several activities
+/**
+ * @param {number} every
+ * @param {number} [filter]
+ * @returns {(state: string) => void}
+ */
 export function makeProfileHook(every, title = '', filter) {
     if (!(every > 0)) return () => { }
+    /** @type {Record<string, number>} */
     var times = {}
     var started = 0, last = 0, iter = 0, total = 0
 
@@ -264,7 +391,7 @@ export function makeProfileHook(every, title = '', filter) {
         started = last = performance.now()
         iter++
     }
-    var add = (name) => {
+    var add = (/** @type {string} */ name) => {
         var t = performance.now()
         times[name] = (times[name] || 0) + (t - last)
         last = t
@@ -281,7 +408,7 @@ export function makeProfileHook(every, title = '', filter) {
         times = {}
         iter = total = 0
     }
-    return (state) => {
+    return (/** @type {string} */ state) => {
         if (state === 'start') start()
         else if (state === 'end') report()
         else add(state)
@@ -292,13 +419,20 @@ export function makeProfileHook(every, title = '', filter) {
 
 
 // simple thing for reporting time actions/sec
+/**
+ * @param {number} _every
+ * @param {string} _title
+ * @param {number} filter
+ * @returns {(state: string) => void}
+ */
 export function makeThroughputHook(_every, _title, filter) {
     var title = _title || ''
     var every = _every || 1
+    /** @type {Record<string, number>} */
     var counts = {}
     var started = performance.now()
     var iter = 0
-    return function profile_hook(state) {
+    return function profile_hook(/** @type {string} */ state) {
         if (state === 'start') return
         if (state === 'end') {
             if (++iter < every) return

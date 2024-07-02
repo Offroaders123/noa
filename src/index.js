@@ -37,6 +37,7 @@ var PROFILE = 0
 var PROFILE_RENDER = 0
 
 
+/** @type {ConstructorParameters<typeof Engine>[0]} */
 var defaultOptions = {
     debug: false,
     silent: false,
@@ -112,6 +113,8 @@ export class Engine extends EventEmitter {
      *    Alerts client about a terrain mesh being added to the scene
      *  + `removingTerrainMesh => (mesh)`  
      *    Alerts client before a terrain mesh is removed.
+     * 
+     * @param {{ debug?: boolean; silent?: boolean; silentBabylon?: boolean; playerHeight?: number; playerWidth?: number; playerStart?: [number, number, number]; playerAutoStep?: boolean; playerShadowComponent?: boolean; tickRate?: number; maxRenderRate?: number; blockTestDistance?: number; stickyPointerLock?: boolean; dragCameraOutsidePointerLock?: boolean; stickyFullscreen?: boolean; skipDefaultHighlighting?: boolean; originRebaseDistance?: number; }} opts
     */
     constructor(opts = {}) {
         super()
