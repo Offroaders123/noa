@@ -53,10 +53,18 @@ export function TerrainMesher(noa) {
     */
 
     // set or clean up any per-chunk properties needed for terrain meshing
+    /**
+     * @param {import('./chunk').Chunk} chunk 
+     * @returns {void}
+     */
     this.initChunk = function (chunk) {
         chunk._terrainMeshes.length = 0
     }
 
+    /**
+     * @param {import('./chunk').Chunk} chunk 
+     * @returns {void}
+     */
     this.disposeChunk = function (chunk) {
         chunk._terrainMeshes.forEach(mesh => {
             noa.emit('removingTerrainMesh', mesh)
@@ -329,6 +337,12 @@ function GreedyMesher(noa, terrainMatManager) {
     var missingCoordLookup = [0, 0, 1, 2, 3, 3]
 
 
+    /**
+     * @param {number} i
+     * @param {number} j
+     * @param {number} k
+     * @returns {boolean}
+     */
     function voxelIsSolid(i, j, k) {
         var li = coordToLoc[i + 1]
         var lj = coordToLoc[j + 1]
@@ -361,6 +375,12 @@ function GreedyMesher(noa, terrainMatManager) {
      *      Each mask value is a terrain material ID, negative if
      *      the face needs to point in the -i direction (towards voxel arr A)
      * 
+     * @param {number} d
+     * @param arrA
+     * @param {number} iA
+     * @param arrB
+     * @param {number} iB
+     * @param {[] | null} [wholeLayerVoxel]
      * @returns {number} number of mesh faces found
      */
 
@@ -457,6 +477,17 @@ function GreedyMesher(noa, terrainMatManager) {
     //
     // construct geometry data from the masks
 
+    /**
+     * @param {number} i
+     * @param {number} d
+     * @param {number} u
+     * @param {number} v
+     * @param {number} len1
+     * @param {number} len2
+     * @param {number} numFaces
+     * @param {{ numFaces: number; terrainID: number; }[]} faceDataSet
+     * @returns {void}
+     */
     function constructGeometryFromMasks(i, d, u, v, len1, len2, numFaces, faceDataSet) {
         var doAO = noa.rendering.useAO
         var mask = maskCache
