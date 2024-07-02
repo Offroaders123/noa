@@ -61,6 +61,11 @@ export default function (noa) {
         onRemove: null,
 
 
+        /**
+         * @param {number} dt
+         * @param states
+         * @returns {void}
+         */
         system: function movementProcessor(dt, states) {
             var ents = noa.entities
             for (var i = 0; i < states.length; i++) {
@@ -84,6 +89,7 @@ var zeroVec = vec3.create()
  * @param {number} dt 
  * @param {MovementState} state 
  * @param {*} body 
+ * @returns {void}
 */
 
 function applyMovementPhysics(dt, state, body) {

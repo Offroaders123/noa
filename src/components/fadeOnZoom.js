@@ -4,6 +4,9 @@
  * when camera zoom is less than a certain amount
  */
 
+/**
+ * @param {import('../index.js').Engine} noa
+ */
 export default function (noa) {
     return {
 
@@ -29,6 +32,12 @@ export default function (noa) {
 }
 
 
+/**
+ * @param state
+ * @param {number} zoom
+ * @param {import("../index.js").Engine} noa
+ * @returns {void}
+ */
 function checkZoom(state, zoom, noa) {
     if (!noa.ents.hasMesh(state.__id)) return
     var mesh = noa.ents.getMeshData(state.__id).mesh

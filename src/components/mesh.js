@@ -2,6 +2,9 @@
 import vec3 from 'gl-vec3'
 
 
+/**
+ * @param {import('../index.js').Engine} noa
+ */
 export default function (noa) {
     return {
 
@@ -15,6 +18,11 @@ export default function (noa) {
         },
 
 
+        /**
+         * @param {number} eid
+         * @param state
+         * @returns {void}
+         */
         onAdd: function (eid, state) {
             // implicitly assume there's already a position component
             var posDat = noa.ents.getPositionData(eid)
@@ -34,12 +42,22 @@ export default function (noa) {
         },
 
 
+        /**
+         * @param eid
+         * @param state
+         * @returns {void}
+         */
         onRemove: function (eid, state) {
             state.mesh.dispose()
         },
 
 
 
+        /**
+         * @param dt
+         * @param states
+         * @returns {void}
+         */
         renderSystem: function (dt, states) {
             // before render move each mesh to its render position, 
             // set by the physics engine or driving logic

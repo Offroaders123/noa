@@ -29,6 +29,11 @@ export default function (noa) {
 
         state: new PhysicsState,
 
+        /**
+         * @param {number} entID
+         * @param state
+         * @returns {void}
+         */
         onAdd: function (entID, state) {
             state.body = noa.physics.addBody()
             // implicitly assume body has a position component, to get size
@@ -37,6 +42,11 @@ export default function (noa) {
         },
 
 
+        /**
+         * @param {number} entID
+         * @param state
+         * @returns {void}
+         */
         onRemove: function (entID, state) {
             // update position before removing
             // this lets entity wind up at e.g. the result of a collision
@@ -50,6 +60,11 @@ export default function (noa) {
         },
 
 
+        /**
+         * @param {number} dt
+         * @param states
+         * @returns {void}
+         */
         system: function (dt, states) {
             for (var i = 0; i < states.length; i++) {
                 var state = states[i]
@@ -59,6 +74,11 @@ export default function (noa) {
         },
 
 
+        /**
+         * @param {number} dt
+         * @param states
+         * @returns {void}
+         */
         renderSystem: function (dt, states) {
 
             var tickPos = noa.positionInCurrentTick
@@ -92,6 +112,11 @@ export default function (noa) {
 // var offset = vec3.create()
 var local = vec3.create()
 
+/**
+ * @param {PhysicsState} physState
+ * @param {import("./position").PositionState} posState
+ * @returns {void}
+ */
 export function setPhysicsFromPosition(physState, posState) {
     var box = physState.body.aabb
     var ext = posState._extents
@@ -101,6 +126,11 @@ export function setPhysicsFromPosition(physState, posState) {
 }
 
 
+/**
+ * @param {PhysicsState} physState
+ * @param {import("./position").PositionState} posState
+ * @returns {void}
+ */
 function setPositionFromPhysics(physState, posState) {
     var base = physState.body.aabb.base
     var hw = posState.width / 2
@@ -108,6 +138,13 @@ function setPositionFromPhysics(physState, posState) {
 }
 
 
+/**
+ * @param {PhysicsState} physState
+ * @param {import("./position").PositionState} posState
+ * @param {number} backtrackAmt
+ * @param {boolean} smoothed
+ * @returns {void}
+ */
 function backtrackRenderPos(physState, posState, backtrackAmt, smoothed) {
     // pos = pos + backtrack * body.velocity
     var vel = physState.body.velocity

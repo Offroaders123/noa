@@ -1,5 +1,8 @@
 
 
+/**
+ * @param {import('../index.js').Engine} noa
+ */
 export default function (noa) {
     return {
 
@@ -11,6 +14,11 @@ export default function (noa) {
             callback: null
         },
 
+        /**
+         * @param {number} eid
+         * @param state
+         * @returns {void}
+         */
         onAdd: function (eid, state) {
             // add collide handler for physics engine to call
             var ents = noa.entities
@@ -23,6 +31,11 @@ export default function (noa) {
             }
         },
 
+        /**
+         * @param {number} eid
+         * @param state
+         * @returns {void}
+         */
         onRemove: function (eid, state) {
             var ents = noa.entities
             if (ents.hasPhysics(eid)) {

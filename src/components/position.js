@@ -53,6 +53,10 @@ export default function (noa) {
 
         state: new PositionState,
 
+        /**
+         * @param {number} eid
+         * @param state
+         */
         onAdd: function (eid, state) {
             // copy position into a plain array
             var pos = [0, 0, 0]
@@ -73,6 +77,10 @@ export default function (noa) {
 
 
 
+        /**
+         * @param {number} dt
+         * @param states
+         */
         system: function (dt, states) {
             var off = noa.worldOriginOffset
             for (var i = 0; i < states.length; i++) {
@@ -89,6 +97,9 @@ export default function (noa) {
 
 
 // update an entity's position state `_extents` 
+/**
+ * @param state
+ */
 export function updatePositionExtents(state) {
     var hw = state.width / 2
     var lpos = state._localPosition

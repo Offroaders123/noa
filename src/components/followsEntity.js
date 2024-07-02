@@ -7,6 +7,9 @@ import vec3 from 'gl-vec3'
  * possibly by a fixed offset, and the same for renderPositions each render
  */
 
+/**
+ * @param {import('../index.js').Engine} noa
+ */
 export default function (noa) {
 
     return {
@@ -21,6 +24,11 @@ export default function (noa) {
             onTargetMissing: null,
         },
 
+        /**
+         * @param eid
+         * @param state
+         * @returns {void}
+         */
         onAdd: function (eid, state) {
             var off = vec3.create()
             state.offset = (state.offset) ? vec3.copy(off, state.offset) : off
@@ -31,6 +39,11 @@ export default function (noa) {
         onRemove: null,
 
 
+        /**
+         * @param dt
+         * @param states
+         * @returns {void}
+         */
         // on tick, copy over regular positions
         system: function followEntity(dt, states) {
             for (var i = 0; i < states.length; i++) {
@@ -39,6 +52,11 @@ export default function (noa) {
         },
 
 
+        /**
+         * @param dt
+         * @param states
+         * @returns {void}
+         */
         // on render, copy over render positions
         renderSystem: function followEntityMesh(dt, states) {
             for (var i = 0; i < states.length; i++) {
@@ -49,6 +67,10 @@ export default function (noa) {
 
 
 
+    /**
+     * @param state
+     * @returns {void}
+     */
     function updatePosition(state) {
         var id = state.__id
         var self = noa.ents.getPositionData(id)
@@ -61,6 +83,10 @@ export default function (noa) {
         }
     }
 
+    /**
+     * @param state
+     * @returns {void}
+     */
     function updateRenderPosition(state) {
         var id = state.__id
         var self = noa.ents.getPositionData(id)
