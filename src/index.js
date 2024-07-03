@@ -260,6 +260,9 @@ export class Engine extends EventEmitter {
         // add a default block highlighting function
         if (!opts.skipDefaultHighlighting) {
             // the default listener, defined onto noa in case people want to remove it later
+            /**
+             * @param tgt
+             */
             this.defaultBlockHighlightFunction = (tgt) => {
                 if (tgt) {
                     this.rendering.highlightBlockFace(true, tgt.position, tgt.normal)
@@ -300,8 +303,11 @@ export class Engine extends EventEmitter {
 
         /** @internal */
         this._pickResult = {
+            /** @type {[number, number, number]} */
             _localPosition: vec3.create(),
+            /** @type {[number, number, number]} */
             position: [0, 0, 0],
+            /** @type {[number, number, number]} */
             normal: [0, 0, 0],
         }
 
@@ -340,12 +346,14 @@ export class Engine extends EventEmitter {
      *
     */
 
+
     /**
      * Tick function, called by container module at a fixed timestep. 
      * Clients should not normally need to call this manually.
      * @internal
-    */
-
+     * @param {number} dt
+     * @returns {void}
+     */
     tick(dt) {
         dt *= this.timeScale || 1
 
@@ -388,7 +396,10 @@ export class Engine extends EventEmitter {
      * where dt is the time in ms *since the last tick*.
      * Clients should not normally need to call this manually.
      * @internal
-    */
+     * @param {number} dt
+     * @param {number} framePart
+     * @returns {void}
+     */
     render(dt, framePart) {
         dt *= this.timeScale || 1
 
@@ -449,29 +460,35 @@ export class Engine extends EventEmitter {
         }
     }
 
-    /** 
+    /**
      * Get the voxel ID at the specified position
-    */
+     * @param {number | [number, number, number]} x
+     */
     getBlock(x, y = 0, z = 0) {
-        if (x.length) return this.world.getBlockID(x[0], x[1], x[2])
+        if (typeof x !== "number") return this.world.getBlockID(x[0], x[1], x[2])
         return this.world.getBlockID(x, y, z)
     }
 
-    /** 
+    /**
      * Sets the voxel ID at the specified position. 
-     * Does not check whether any entities are in the way! 
+     * Does not check whether any entities are in the way!
+     * @param {number} id
+     * @param {number | [number, number, number]} x
      */
     setBlock(id, x, y = 0, z = 0) {
-        if (x.length) return this.world.setBlockID(id, x[0], x[1], x[2])
+        if (typeof x !== "number") return this.world.setBlockID(id, x[0], x[1], x[2])
         return this.world.setBlockID(id, x, y, z)
     }
 
     /**
      * Adds a block, unless there's an entity in the way.
-    */
+     * @param {number} id
+     * @param {number | [number, number, number]} x
+     * @returns {number}
+     */
     addBlock(id, x, y = 0, z = 0) {
         // add a new terrain block, if nothing blocks the terrain there
-        if (x.length) {
+        if (typeof x !== "number") {
             if (this.entities.isTerrainBlocked(x[0], x[1], x[2])) return
             this.world.setBlockID(id, x[0], x[1], x[2])
             return id
@@ -493,7 +510,7 @@ export class Engine extends EventEmitter {
     */
 
 
-    /** 
+    /**
      * Precisely converts a world position to the current internal 
      * local frame of reference.
      * 
@@ -503,6 +520,10 @@ export class Engine extends EventEmitter {
      *  * `global`: input position in global coords
      *  * `globalPrecise`: (optional) sub-voxel offset to the global position
      *  * `local`: output array which will receive the result
+     * @param {[number, number, number]} global
+     * @param {[number, number, number]} globalPrecise
+     * @param {[number, number, number]} local
+     * @returns {[number, number, number]}
      */
     globalToLocal(global, globalPrecise, local) {
         var off = this.worldOriginOffset
@@ -518,7 +539,7 @@ export class Engine extends EventEmitter {
         }
     }
 
-    /** 
+    /**
      * Precisely converts a world position to the current internal 
      * local frame of reference.
      * 
@@ -532,7 +553,11 @@ export class Engine extends EventEmitter {
      * If both output arrays are passed in, `global` will get int values and 
      * `globalPrecise` will get fractional parts. If only one array is passed in,
      * `global` will get the whole output position.
-    */
+     * @param {[number, number, number]} local
+     * @param {[number, number, number]} global
+     * @param {[number, number, number] | null} [globalPrecise] 
+     * @returns {[number, number, number]}
+     */
     localToGlobal(local, global, globalPrecise = null) {
         var off = this.worldOriginOffset
         if (globalPrecise) {
@@ -559,8 +584,8 @@ export class Engine extends EventEmitter {
      * 
      * See `/docs/positions.md` for info on working with precise positions.
      * 
-     * @param {number[]} pos where to pick from (default: player's eye pos)
-     * @param {number[]} dir direction to pick along (default: camera vector)
+     * @param {[number, number, number] | null} pos where to pick from (default: player's eye pos)
+     * @param {[number, number, number] | null} dir direction to pick along (default: camera vector)
      * @param {number} dist pick distance (default: `noa.blockTestDistance`)
      * @param {(id:number) => boolean} blockTestFunction which voxel IDs can be picked (default: any solid voxel)
     */
@@ -580,14 +605,14 @@ export class Engine extends EventEmitter {
      * @internal
      * Do a raycast in local coords. 
      * See `/docs/positions.md` for more info.
-     * @param {number[]} pos where to pick from (default: player's eye pos)
-     * @param {number[]} dir direction to pick along (default: camera vector)
+     * @param {[number, number, number] | null} pos where to pick from (default: player's eye pos)
+     * @param {[number, number, number] | null} dir direction to pick along (default: camera vector)
      * @param {number} dist pick distance (default: `noa.blockTestDistance`)
      * @param {(id:number) => boolean} blockTestFunction which voxel IDs can be picked (default: any solid voxel)
      * @returns { null | {
-     *      position: number[],
-     *      normal: number[],
-     *      _localPosition: number[],
+     *      position: [number, number, number],
+     *      normal: [number, number, number],
+     *      _localPosition: [number, number, number],
      * }}
      */
     _localPick(pos = null, dir = null, dist = -1, blockTestFunction = null) {
@@ -596,7 +621,7 @@ export class Engine extends EventEmitter {
         var testFn = blockTestFunction || this.registry.getBlockSolidity
         var world = this.world
         var off = this.worldOriginOffset
-        var testVoxel = function (x, y, z) {
+        var testVoxel = function (/** @type {number} */ x, /** @type {number} */ y, /** @type {number} */ z) {
             var id = world.getBlockID(x + off[0], y + off[1], z + off[2])
             return testFn(id)
         }
@@ -640,6 +665,10 @@ export class Engine extends EventEmitter {
  *      rebase world origin offset around the player if necessary
  *
 */
+/**
+ * @param {Engine} noa
+ * @returns {void}
+ */
 function checkWorldOffset(noa) {
     var lpos = noa.ents.getPositionData(noa.playerEntity)._localPosition
     var cutoff = noa._originRebaseDistance
@@ -660,6 +689,10 @@ function checkWorldOffset(noa) {
 
 // Each frame, by default pick along the player's view vector 
 // and tell rendering to highlight the struck block face
+/**
+ * @param {Engine} noa
+ * @returns {void}
+ */
 function updateBlockTargets(noa) {
     var newhash = 0
     var blockIdFn = noa.blockTargetIdCheck || noa.registry.getBlockSolidity
@@ -694,8 +727,18 @@ function updateBlockTargets(noa) {
  * 
  */
 
+/**
+ * @param {Engine} noa
+ * @returns {void}
+ */
 function deprecateStuff(noa) {
     var ver = `0.27`
+    /**
+     * @param {object} loc
+     * @param {PropertyKey} name
+     * @param {string} msg
+     * @returns {void}
+     */
     var dep = (loc, name, msg) => {
         var throwFn = () => { throw `This property changed in ${ver} - ${msg}` }
         Object.defineProperty(loc, name, { get: throwFn, set: throwFn })
