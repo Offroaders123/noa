@@ -54,11 +54,11 @@ var prevRad = 0, prevAnswer = 0
 // partly "unrolled" loops to copy contents of ndarrays
 // when there's no source, zeroes out the array instead
 /**
- * @param {number} src
- * @param tgt
- * @param pos
+ * @param {number | import("ndarray").NdArray<number[]>} src
+ * @param {import("ndarray").NdArray<number[]>} tgt
+ * @param {import("gl-vec3")} pos
  * @param {number[]} size
- * @param tgtPos
+ * @param {import("gl-vec3")} tgtPos
  * @returns {void}
  */
 export function copyNdarrayContents(src, tgt, pos, size, tgtPos) {
@@ -71,17 +71,17 @@ export function copyNdarrayContents(src, tgt, pos, size, tgtPos) {
     }
 }
 /**
- * @param src
- * @param tgt
+ * @param {import("ndarray").NdArray<number[]>} src
+ * @param {import("ndarray").NdArray<number[]>} tgt
  * @param {number} i0
  * @param {number} j0
- * @param k0
+ * @param {number} k0
  * @param {number} si
  * @param {number} sj
  * @param {number} sk
  * @param {number} ti
  * @param {number} tj
- * @param tk
+ * @param {number} tk
  * @returns {void}
  */
 function doNdarrayCopy(src, tgt, i0, j0, k0, si, sj, sk, ti, tj, tk) {
@@ -102,10 +102,10 @@ function doNdarrayCopy(src, tgt, i0, j0, k0, si, sj, sk, ti, tj, tk) {
 
 /**
  * @param {number} value
- * @param tgt
+ * @param {import("ndarray").NdArray<number[]>} tgt
  * @param {number} i0
  * @param {number} j0
- * @param k0
+ * @param {number} k0
  * @param {number} si
  * @param {number} sj
  * @param {number} sk
