@@ -11,17 +11,17 @@ import vec3 from 'gl-vec3'
 export class PositionState {
     constructor() {
         /** Position in global coords (may be low precision) 
-         * @type {null | number[]} */
+         * @type {null | vec3} */
         this.position = null
         this.width = 0.8
         this.height = 0.8
 
         /** Precise position in local coords
-         * @type {null | number[]} */
+         * @type {null | vec3} */
         this._localPosition = null
 
         /** [x,y,z] in LOCAL COORDS
-         * @type {null | number[]} */
+         * @type {null | vec3} */
         this._renderPosition = null
 
         /** [lo,lo,lo, hi,hi,hi] in LOCAL COORDS

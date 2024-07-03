@@ -114,7 +114,7 @@ export class Engine extends EventEmitter {
      *  + `removingTerrainMesh => (mesh)`  
      *    Alerts client before a terrain mesh is removed.
      * 
-     * @param {{ debug?: boolean; silent?: boolean; silentBabylon?: boolean; playerHeight?: number; playerWidth?: number; playerStart?: [number, number, number]; playerAutoStep?: boolean; playerShadowComponent?: boolean; tickRate?: number; maxRenderRate?: number; blockTestDistance?: number; stickyPointerLock?: boolean; dragCameraOutsidePointerLock?: boolean; stickyFullscreen?: boolean; skipDefaultHighlighting?: boolean; originRebaseDistance?: number; }} opts
+     * @param {{ debug?: boolean; silent?: boolean; silentBabylon?: boolean; playerHeight?: number; playerWidth?: number; playerStart?: vec3; playerAutoStep?: boolean; playerShadowComponent?: boolean; tickRate?: number; maxRenderRate?: number; blockTestDistance?: number; stickyPointerLock?: boolean; dragCameraOutsidePointerLock?: boolean; stickyFullscreen?: boolean; skipDefaultHighlighting?: boolean; originRebaseDistance?: number; }} opts
     */
     constructor(opts = {}) {
         super()
@@ -134,7 +134,10 @@ export class Engine extends EventEmitter {
         this._originRebaseDistance = opts.originRebaseDistance
 
         // world origin offset, used throughout engine for origin rebasing
-        /** @internal */
+        /**
+         * @internal
+         * @type {vec3}
+        */
         this.worldOriginOffset = [0, 0, 0]
 
         // how far engine is into the current tick. Updated each render.
@@ -250,9 +253,9 @@ export class Engine extends EventEmitter {
          * Dynamically updated object describing the currently targeted block.
          * @type {null | { 
          *      blockID:number,
-         *      position: number[],
-         *      normal: number[],
-         *      adjacent: number[],
+         *      position: vec3,
+         *      normal: vec3,
+         *      adjacent: vec3,
          * }} 
         */
         this.targetedBlock = null
@@ -303,11 +306,11 @@ export class Engine extends EventEmitter {
 
         /** @internal */
         this._pickResult = {
-            /** @type {[number, number, number]} */
+            /** @type {vec3} */
             _localPosition: vec3.create(),
-            /** @type {[number, number, number]} */
+            /** @type {vec3} */
             position: [0, 0, 0],
-            /** @type {[number, number, number]} */
+            /** @type {vec3} */
             normal: [0, 0, 0],
         }
 
@@ -462,7 +465,7 @@ export class Engine extends EventEmitter {
 
     /**
      * Get the voxel ID at the specified position
-     * @param {number | [number, number, number]} x
+     * @param {number | vec3} x
      */
     getBlock(x, y = 0, z = 0) {
         if (typeof x !== "number") return this.world.getBlockID(x[0], x[1], x[2])
@@ -473,7 +476,7 @@ export class Engine extends EventEmitter {
      * Sets the voxel ID at the specified position. 
      * Does not check whether any entities are in the way!
      * @param {number} id
-     * @param {number | [number, number, number]} x
+     * @param {number | vec3} x
      */
     setBlock(id, x, y = 0, z = 0) {
         if (typeof x !== "number") return this.world.setBlockID(id, x[0], x[1], x[2])
@@ -483,7 +486,7 @@ export class Engine extends EventEmitter {
     /**
      * Adds a block, unless there's an entity in the way.
      * @param {number} id
-     * @param {number | [number, number, number]} x
+     * @param {number | vec3} x
      * @returns {number}
      */
     addBlock(id, x, y = 0, z = 0) {
@@ -520,10 +523,10 @@ export class Engine extends EventEmitter {
      *  * `global`: input position in global coords
      *  * `globalPrecise`: (optional) sub-voxel offset to the global position
      *  * `local`: output array which will receive the result
-     * @param {[number, number, number]} global
-     * @param {[number, number, number]} globalPrecise
-     * @param {[number, number, number]} local
-     * @returns {[number, number, number]}
+     * @param {vec3} global
+     * @param {vec3} globalPrecise
+     * @param {vec3} local
+     * @returns {vec3}
      */
     globalToLocal(global, globalPrecise, local) {
         var off = this.worldOriginOffset
@@ -553,10 +556,10 @@ export class Engine extends EventEmitter {
      * If both output arrays are passed in, `global` will get int values and 
      * `globalPrecise` will get fractional parts. If only one array is passed in,
      * `global` will get the whole output position.
-     * @param {[number, number, number]} local
-     * @param {[number, number, number]} global
-     * @param {[number, number, number] | null} [globalPrecise] 
-     * @returns {[number, number, number]}
+     * @param {vec3} local
+     * @param {vec3} global
+     * @param {vec3 | null} [globalPrecise] 
+     * @returns {vec3}
      */
     localToGlobal(local, global, globalPrecise = null) {
         var off = this.worldOriginOffset
@@ -584,8 +587,8 @@ export class Engine extends EventEmitter {
      * 
      * See `/docs/positions.md` for info on working with precise positions.
      * 
-     * @param {[number, number, number] | null} pos where to pick from (default: player's eye pos)
-     * @param {[number, number, number] | null} dir direction to pick along (default: camera vector)
+     * @param {vec3 | null} pos where to pick from (default: player's eye pos)
+     * @param {vec3 | null} dir direction to pick along (default: camera vector)
      * @param {number} dist pick distance (default: `noa.blockTestDistance`)
      * @param {(id:number) => boolean} blockTestFunction which voxel IDs can be picked (default: any solid voxel)
     */
@@ -605,14 +608,14 @@ export class Engine extends EventEmitter {
      * @internal
      * Do a raycast in local coords. 
      * See `/docs/positions.md` for more info.
-     * @param {[number, number, number] | null} pos where to pick from (default: player's eye pos)
-     * @param {[number, number, number] | null} dir direction to pick along (default: camera vector)
+     * @param {vec3 | null} pos where to pick from (default: player's eye pos)
+     * @param {vec3 | null} dir direction to pick along (default: camera vector)
      * @param {number} dist pick distance (default: `noa.blockTestDistance`)
      * @param {(id:number) => boolean} blockTestFunction which voxel IDs can be picked (default: any solid voxel)
      * @returns { null | {
-     *      position: [number, number, number],
-     *      normal: [number, number, number],
-     *      _localPosition: [number, number, number],
+     *      position: vec3,
+     *      normal: vec3,
+     *      _localPosition: vec3,
      * }}
      */
     _localPick(pos = null, dir = null, dist = -1, blockTestFunction = null) {

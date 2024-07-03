@@ -1,4 +1,5 @@
 declare module "fast-voxel-raycast" {
+  import vec3 from "gl-vec3";
   export = traceRay;
-  function traceRay(getVoxel: (x: number, y: number, z: number) => boolean, origin: [number, number, number], direction: [number, number, number], max_d: number, hit_pos: [number, number, number], hit_norm: [number, number, number]): true | 0;
+  function traceRay(getVoxel: (x: number, y: number, z: number) => boolean, origin: vec3, direction: vec3, max_d: number, hit_pos: vec3, hit_norm: vec3): true | 0;
 }

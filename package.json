@@ -42,6 +42,7 @@
         "@types/box-intersect": "^1.0.3",
         "@types/ndarray": "^1.0.14",
         "eslint": "^8.3.0",
+        "gl-matrix": "^3.4.3",
         "js-beautify": "^1.14.0",
         "typedoc": "^0.24.6",
         "typedoc-plugin-missing-exports": "^2.0.0",

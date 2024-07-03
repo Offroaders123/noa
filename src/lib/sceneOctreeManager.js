@@ -53,7 +53,7 @@ export class SceneOctreeManager {
         /**
          * @param mesh
          * @param isStatic
-         * @param {[number, number, number]} pos
+         * @param {import("gl-vec3")} pos
          * @param chunk
          */
         this.addMesh = (mesh, isStatic, pos, chunk) => {

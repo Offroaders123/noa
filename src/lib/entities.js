@@ -131,7 +131,7 @@ export class Entities extends ECS {
 
         /**
          * Returns the entity's position vector.
-         * @type {(id:number) => number[]}
+         * @type {(id:number) => vec3}
         */
         this.getPosition = (id) => {
             var state = this.getPositionData(id)
