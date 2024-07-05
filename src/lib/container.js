@@ -23,7 +23,11 @@ import { MicroGameShell } from 'micro-game-shell'
 
 export class Container extends EventEmitter {
 
-    /** @internal */
+    /**
+     * @internal
+     * @param {import("../index").Engine} noa
+     * @param {ConstructorParameters<typeof import("../index.js").Engine>[0] & { domElement?: string | Element | null; }} opts
+     */
     constructor(noa, opts) {
         super()
         opts = opts || {}
@@ -117,13 +121,18 @@ export class Container extends EventEmitter {
      *
     */
 
-    /** @internal */
+    /**
+     * @internal
+     * @param {Node} htmlElement
+     * @returns {void}
+     */
     appendTo(htmlElement) {
         this.element.appendChild(htmlElement)
     }
 
     /** 
      * Sets whether `noa` should try to acquire or release pointerLock
+     * @returns {void}
     */
     setPointerLock(lock = false) {
         // not sure if this will work robustly
@@ -142,6 +151,9 @@ export class Container extends EventEmitter {
 */
 
 
+/**
+ * @returns {HTMLDivElement}
+ */
 function createContainerDiv() {
     // based on github.com/mikolalysenko/game-shell - makeDefaultContainer()
     var container = document.createElement("div")
@@ -161,6 +173,10 @@ function createContainerDiv() {
 }
 
 
+/**
+ * @param {Element} el
+ * @returns {HTMLCanvasElement}
+ */
 function getOrCreateCanvas(el) {
     // based on github.com/stackgl/gl-now - default canvas
     var canvas = el.querySelector('canvas')
@@ -182,6 +198,10 @@ function getOrCreateCanvas(el) {
 // Needlessly complex because Chrome/Android claims to support but doesn't.
 // For now, just feature detect, but assume no support if a touch event occurs
 // TODO: see if this makes sense on hybrid touch/mouse devices
+/**
+ * @param {Container} self
+ * @returns {void}
+ */
 function detectPointerLock(self) {
     var lockElementExists =
         ('pointerLockElement' in document) ||
@@ -203,6 +223,9 @@ function detectPointerLock(self) {
  * Without this, the page sometimes initializes with the canva
  * zoomed into its lower left quadrant. 
  * Resizing the canvas fixes the issue (also: resizing page, changing zoom...)
+ * @param {import("../index").Engine} noa
+ * @param {HTMLCanvasElement} canvas
+ * @returns {void}
  */
 function doCanvasBugfix(noa, canvas) {
     var ct = 0
