@@ -52,7 +52,9 @@ export class Camera {
     _sweepGetVoxel
     /** @type {vec3} */
     _sweepVec;
-    /** @type {() => boolean} */
+    /**
+     * @type {(cumulative_t: number, axis: number, dir: number, left: vec3) => boolean}
+     */
     _sweepHit;
 
     /** 
@@ -313,6 +315,7 @@ export class Camera {
 
 /**
  * @param {Camera} self
+ * @returns {number}
  */
 function cameraObstructionDistance(self) {
     if (!self._sweepBox) {
