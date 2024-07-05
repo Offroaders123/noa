@@ -19,6 +19,10 @@ var defaultBindings = {
 }
 
 /**
+ * @typedef {{ [K in keyof typeof defaultBindings]: string | string[]; }} Bindings
+*/
+
+/**
  * `noa.inputs` - Handles key and mouse input bindings.
  * 
  * This module extends 
@@ -45,13 +49,19 @@ var defaultBindings = {
 
 export class Inputs extends GameInputs {
 
-    /** @internal */
+    /**
+     * @internal
+     * @param {import('../index.js').Engine} noa
+     * @param {ConstructorParameters<typeof import("game-inputs").GameInputs>[1] & { bindings?: Bindings; }} opts
+     * @param {HTMLElement} element
+     */
     constructor(noa, opts, element) {
         opts = Object.assign({}, defaultOptions, opts)
         super(element, opts)
 
         var b = opts.bindings || defaultBindings
-        for (var name in b) {
+        for (var namee in b) {
+            let name = /** @type {keyof Bindings} */ (namee);
             var keys = Array.isArray(b[name]) ? b[name] : [b[name]]
             this.bind(name, ...keys)
         }
