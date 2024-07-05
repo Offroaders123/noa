@@ -528,7 +528,7 @@ World.prototype._getChunkByCoords = function (x = 0, y = 0, z = 0) {
 
 // internal accessor for chunks to queue themeselves for remeshing 
 // after their data changes
-World.prototype._queueChunkForRemesh = function (chunk) {
+World.prototype._queueChunkForRemesh = function (/** @type {Chunk} */ chunk) {
     possiblyQueueChunkForMeshing(this, chunk)
 }
 
@@ -792,7 +792,7 @@ function processMeshingQueue(world, firstOnly) {
 
 /**
  * @param {World} world
- * @param chunk
+ * @param {Chunk} chunk
  * @returns {boolean}
  */
 function possiblyQueueChunkForMeshing(world, chunk) {
@@ -922,6 +922,7 @@ function removeChunk(world, i, j, k) {
 
 /**
  * @param {World} world
+ * @param {Chunk} chunk
  * @returns {void}
  */
 function doChunkRemesh(world, chunk) {

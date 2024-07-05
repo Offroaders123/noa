@@ -23,7 +23,16 @@ import ndarray from 'ndarray'
  *
  */
 
-/** @param {import('../index').Engine} noa */
+/**
+ * @param {import('../index').Engine} noa
+ * @param {string} requestID
+ * @param {number} ci
+ * @param {number} cj
+ * @param {number} ck
+ * @param {number} size
+ * @param {ndarray.NdArray<Uint16Array>} dataArray
+ * @param {number} [fillVoxelID]
+ */
 export function Chunk(noa, requestID, ci, cj, ck, size, dataArray, fillVoxelID = -1) {
     this.noa = noa
     this.isDisposed = false
@@ -62,6 +71,7 @@ export function Chunk(noa, requestID, ci, cj, ck, size, dataArray, fillVoxelID =
     }
 
     // references to neighboring chunks, if they exist (filled in by `world`)
+    /** @type {Chunk[]} */
     var narr = Array.from(Array(27), () => null)
     this._neighbors = ndarray(narr, [3, 3, 3]).lo(1, 1, 1)
     this._neighbors.set(0, 0, 0, this)
@@ -78,12 +88,12 @@ export function Chunk(noa, requestID, ci, cj, ck, size, dataArray, fillVoxelID =
 
 
 // expose logic internally to create and update the voxel data array
-Chunk._createVoxelArray = function (size) {
+Chunk._createVoxelArray = function (/** @type {number} */ size) {
     var arr = new Uint16Array(size * size * size)
     return ndarray(arr, [size, size, size])
 }
 
-Chunk.prototype._updateVoxelArray = function (dataArray, fillVoxelID = -1) {
+Chunk.prototype._updateVoxelArray = function (/** @type {ndarray.NdArray<Uint16Array>} */ dataArray, fillVoxelID = -1) {
     // dispose current object blocks
     callAllBlockHandlers(this, 'onUnload')
     this.noa._objectMesher.disposeChunk(this)
@@ -119,16 +129,16 @@ Chunk.prototype._updateVoxelArray = function (dataArray, fillVoxelID = -1) {
 
 // get/set deal with block IDs, so that this class acts like an ndarray
 
-Chunk.prototype.get = function (i, j, k) {
+Chunk.prototype.get = function (/** @type {number} */ i, /** @type {number} */ j, /** @type {number} */ k) {
     return this.voxels.get(i, j, k)
 }
 
-Chunk.prototype.getSolidityAt = function (i, j, k) {
+Chunk.prototype.getSolidityAt = function (/** @type {number} */ i, /** @type {number} */ j, /** @type {number} */ k) {
     var solidLookup = this.noa.registry._solidityLookup
     return solidLookup[this.voxels.get(i, j, k)]
 }
 
-Chunk.prototype.set = function (i, j, k, newID) {
+Chunk.prototype.set = function (/** @type {number} */ i, /** @type {number} */ j, /** @type {number} */ k, /** @type {number} */ newID) {
     var oldID = this.voxels.get(i, j, k)
     if (newID === oldID) return
 
@@ -205,6 +215,14 @@ Chunk.prototype.set = function (i, j, k, newID) {
 
 
 // helper to call handler of a given type at a particular xyz
+/**
+ * @param {Chunk} chunk
+ * @param handlers
+ * @param {string} type
+ * @param {number} i
+ * @param {number} j
+ * @param {number} k
+ */
 function callBlockHandler(chunk, handlers, type, i, j, k) {
     var handler = handlers[type]
     if (!handler) return
@@ -244,6 +262,10 @@ Chunk.prototype.updateMeshes = function () {
  * 
 */
 
+/**
+ * @param {Chunk} chunk
+ * @returns {void}
+ */
 function scanVoxelData(chunk) {
     var voxels = chunk.voxels
     var data = voxels.data
@@ -344,6 +366,11 @@ Chunk.prototype.dispose = function () {
 
 
 // helper to call a given handler for all blocks in the chunk
+/**
+ * @param {Chunk} chunk
+ * @param {string} type
+ * @returns {void}
+ */
 function callAllBlockHandlers(chunk, type) {
     var voxels = chunk.voxels
     var handlerLookup = chunk.noa.registry._blockHandlerLookup
