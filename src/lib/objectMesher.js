@@ -131,6 +131,10 @@ export function ObjectMesher(noa) {
 
 
     // called by world at end of chunk lifecycle
+    /**
+     * @param {import('./chunk.js').Chunk} chunk
+     * @returns {void}
+     */
     this.disposeChunk = function (chunk) {
         for (var key in chunk._objectBlocks) {
             var id = chunk._objectBlocks[key]
@@ -158,7 +162,7 @@ export function ObjectMesher(noa) {
 
 
     // world rebase handler
-    this._rebaseOrigin = function (delta) {
+    this._rebaseOrigin = function (/** @type {number[]} */ delta) {
         rebaseOffset[0] += delta[0]
         rebaseOffset[1] += delta[1]
         rebaseOffset[2] += delta[2]
@@ -313,12 +317,20 @@ InstanceManager.prototype.setCapacity = function (size = 4) {
 }
 
 
+/**
+ * @param {InstanceManager} mgr
+ * @returns {void}
+ */
 function maybeExpandBuffer(mgr) {
     if (mgr.count < mgr.capacity) return
     var size = Math.max(8, mgr.capacity * 2)
     mgr.setCapacity(size)
 }
 
+/**
+ * @param {InstanceManager} mgr
+ * @returns {void}
+ */
 function maybeContractBuffer(mgr) {
     if (mgr.count > mgr.capacity * 0.4) return
     if (mgr.capacity < 100) return
@@ -337,6 +349,13 @@ var tempMatrixArray = [
     0.0, 0.0, 0.0, 1.0,
 ]
 
+/**
+ * @param {Float32Array | number[]} src
+ * @param {number} srcOff
+ * @param {Float32Array} dest
+ * @param {number} destOff
+ * @returns {void}
+ */
 function copyMatrixData(src, srcOff, dest, destOff) {
     for (var i = 0; i < 16; i++) dest[destOff + i] = src[srcOff + i]
 }

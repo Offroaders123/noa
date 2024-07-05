@@ -33,10 +33,11 @@ var defaultOptions = {
 
 export class Physics extends VoxelPhysics {
 
-    /** 
-     * @internal 
+    /**
+     * @internal
      * @param {import('../index').Engine} noa
-    */
+     * @param {ConstructorParameters<typeof import('../index.js').Engine>[0] & { gravity: [number, number, number]; airDrag: number; fluidDrag: number; fluidDensity: number; minBounceImpulse: number; }} opts
+     */
     constructor(noa, opts) {
         opts = Object.assign({}, defaultOptions, opts)
         var world = noa.world
@@ -46,11 +47,11 @@ export class Physics extends VoxelPhysics {
         // physics engine runs in offset coords, so voxel getters need to match
         var offset = noa.worldOriginOffset
 
-        var blockGetter = (x, y, z) => {
+        var blockGetter = (/** @type {number} */ x, /** @type {number} */ y, /** @type {number} */ z) => {
             var id = world.getBlockID(x + offset[0], y + offset[1], z + offset[2])
             return solidLookup[id]
         }
-        var isFluidGetter = (x, y, z) => {
+        var isFluidGetter = (/** @type {number} */ x, /** @type {number} */ y, /** @type {number} */ z) => {
             var id = world.getBlockID(x + offset[0], y + offset[1], z + offset[2])
             return fluidLookup[id]
         }
