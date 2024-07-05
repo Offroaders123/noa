@@ -46,6 +46,14 @@ var originVector = vec3.create()
 */
 
 export class Camera {
+    /** @type {aabb} */
+    _sweepBox;
+    /** @type {(x?: number, y?: number, z?: number) => boolean} */
+    _sweepGetVoxel
+    /** @type {vec3} */
+    _sweepVec;
+    /** @type {() => boolean} */
+    _sweepHit;
 
     /** 
      * @internal 
@@ -161,13 +169,19 @@ export class Camera {
     /*
      *      Local position functions for high precision
     */
-    /** @internal */
+    /**
+     * @internal
+     * @returns {vec3}
+     */
     _localGetTargetPosition() {
         var pdat = this.noa.ents.getPositionData(this.cameraTarget)
         var pos = tempVectors[0]
         return vec3.copy(pos, pdat._renderPosition)
     }
-    /** @internal */
+    /**
+     * @internal
+     * @returns {vec3}
+     */
     _localGetPosition() {
         var loc = this._localGetTargetPosition()
         if (this.currentZoom === 0) return loc
@@ -180,6 +194,7 @@ export class Camera {
      * Returns the camera's current target position - i.e. the player's 
      * eye position. When the camera is zoomed all the way in, 
      * this returns the same location as `camera.getPosition()`.
+     * @returns {vec3}
     */
     getTargetPosition() {
         var loc = this._localGetTargetPosition()
@@ -190,6 +205,7 @@ export class Camera {
 
     /**
      * Returns the current camera position (read only)
+     * @returns {vec3}
     */
     getPosition() {
         var loc = this._localGetPosition()
@@ -200,6 +216,7 @@ export class Camera {
 
     /**
      * Returns the camera direction vector (read only)
+     * @returns {vec3}
     */
     getDirection() {
         return this._dirVector
@@ -224,6 +241,7 @@ export class Camera {
      * Called before render, if mouseLock etc. is applicable.
      * Applies current mouse x/y inputs to the camera angle and zoom
      * @internal
+     * @returns {void}
     */
 
     applyInputsToCamera() {
@@ -267,13 +285,17 @@ export class Camera {
     /**
      *  Called before all renders, pre- and post- entity render systems
      * @internal
+     * @returns {void}
     */
     updateBeforeEntityRenderSystems() {
         // zoom update
         this.currentZoom += (this.zoomDistance - this.currentZoom) * this.zoomSpeed
     }
 
-    /** @internal */
+    /**
+     * @internal
+     * @returns {void}
+     */
     updateAfterEntityRenderSystems() {
         // clamp camera zoom not to clip into solid terrain
         var maxZoom = cameraObstructionDistance(this)
@@ -289,6 +311,9 @@ export class Camera {
  *  check for obstructions behind camera by sweeping back an AABB
 */
 
+/**
+ * @param {Camera} self
+ */
 function cameraObstructionDistance(self) {
     if (!self._sweepBox) {
         self._sweepBox = new aabb([0, 0, 0], [0.2, 0.2, 0.2])
@@ -313,6 +338,10 @@ function cameraObstructionDistance(self) {
 // workaround for this Chrome 63 + Win10 bug
 // https://bugs.chromium.org/p/chromium/issues/detail?id=781182
 // later updated to also address: https://github.com/fenomas/noa/issues/153
+/**
+ * @param {{ dx: number; dy: number; scrollx: number; scrolly: number; scrollz: number; }} pointerState
+ * @returns {void}
+ */
 function bugFix(pointerState) {
     var dx = pointerState.dx
     var dy = pointerState.dy
