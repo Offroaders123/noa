@@ -16,7 +16,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "aabb-3d": "github:andyhall/aabb-3d",
+    "aabb-3d": "github:fenomas/aabb-3d#c5698961161884397c711e8fb533611642a8a487",
     "box-intersect": "^1.0.1",
     "ent-comp": "^0.5.0",
     "extend": "^3.0.0",
@@ -35,5 +35,8 @@
   },
   "devDependencies": {
     "markdox": "^0.1.10"
+  },
+  "overrides": {
+    "aabb-3d": "$aabb-3d"
   }
 }

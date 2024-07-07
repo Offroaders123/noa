@@ -2,11 +2,12 @@
 # yarn lockfile v1
 
 
-"aabb-3d@github:andyhall/aabb-3d":
-  version "0.3.0"
-  resolved "git+ssh://git@github.com/andyhall/aabb-3d.git#dc718a0c375e39410259237a991c6b626bc81c6a"
+"aabb-3d@github:fenomas/aabb-3d#c5698961161884397c711e8fb533611642a8a487":
+  version "0.2.1"
+  resolved "git+ssh://git@github.com/fenomas/aabb-3d.git#c5698961161884397c711e8fb533611642a8a487"
+  integrity sha512-ytOPwFDwDclBkqtOqAugmY6AmJBdctWqcAibQnPCaMlXf1WrBsd1pBUeFSlE0fbdPY3rpL5/NlXHfSW0Op3viQ==
   dependencies:
-    gl-matrix "^3.4.3"
+    gl-vec3 "^1.0.3"
 
 argparse@^2.0.1:
   version "2.0.1"
@@ -101,7 +102,8 @@ game-inputs@^0.2.0:
 
 game-shell@andyhall/game-shell:
   version "1.3.2"
-  resolved "git+ssh://git@github.com/andyhall/game-shell.git#5cd78b52c6abb5cc250340c635ea79040b56c966"
+  resolved "git+ssh://git@github.com/andyhall/game-shell.git"
+  integrity sha512-ESN6FctbfWnYhiJSziy6IFADCLE/0dr1oPKV788vQbEtOjwE3M2bvNY18LMXXnTx8t0B585GSax8z4ExGUue7w==
   dependencies:
     binary-search-bounds "^1.0.0"
     domready "^1.0.5"
@@ -109,11 +111,6 @@ game-shell@andyhall/game-shell:
     iota-array "^1.0.0"
     uniq "^1.0.0"
     vkey "~0.0.2"
-
-gl-matrix@^3.4.3:
-  version "3.4.3"
-  resolved "https://registry.npmjs.org/gl-matrix/-/gl-matrix-3.4.3.tgz"
-  integrity sha512-wcCp8vu8FT22BnvKVPjXa/ICBWRq/zjFfdofZy1WSpQZpphblv12/bOQLBC1rMM7SGOFS9ltVmKOHil5+Ml7gA==
 
 gl-vec3@^1.0.3:
   version "1.0.3"
