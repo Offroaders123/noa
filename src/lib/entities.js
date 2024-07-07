@@ -81,6 +81,8 @@ function Entities(noa, opts) {
 	// physics
 	var getPhys = this.getStateAccessor(this.names.physics)
 	this.getPhysicsBody = function (id) { return getPhys(id).body }
+	this.getPhysicsInterpolation = function (id) { return getPhys(id).interpolatePosition }
+	this.setPhysicsInterpolation = function (id, pos) { getPhys(id).interpolatePosition = pos }
 
 	// misc
 	this.getMeshData = this.getStateAccessor(this.names.mesh)
@@ -90,7 +92,7 @@ function Entities(noa, opts) {
 
 	// events
 	var self = this
-	noa.on('tick', function (dt) { self.tick(dt) })
+	noa.on('tick', function (dt) {})
 	noa.on('beforeRender', function (dt) { self.render(dt) })
 
 	// this burns entity ID=0, so later code can do (if(entityID)) checks
