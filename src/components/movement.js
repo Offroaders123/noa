@@ -23,16 +23,16 @@ module.exports = function (noa) {
 			jumping: false,
 
 			// options:
-			maxSpeed: 10,
+			maxSpeed: 6,
 			moveForce: 30,
 			responsiveness: 15,
 			runningFriction: 0,
 			standingFriction: 50,
 
 			airMoveMult: 0.5,
-			jumpImpulse: 10,
-			jumpForce: 12,
-			jumpTime: 500, 			// ms
+			jumpImpulse: 11,
+			jumpForce: 6.5,
+			jumpTime: 500,
 			airJumps: 1,
 
 			// internal state
@@ -72,6 +72,28 @@ function applyMovementPhysics(dt, state, body) {
 	//   see https://github.com/andyhall/voxel-fps-controller
 	//   for original code
 
+	var s = noa.world.getBlockID(Math.floor(body.aabb.base[0]), Math.floor(body.aabb.base[1]), Math.floor(body.aabb.base[2]))
+	var c = noa.world.getBlockID(Math.floor(body.aabb.base[0]), Math.floor(body.aabb.base[1] + 0.5), Math.floor(body.aabb.base[2]))
+	var sprint = false
+	var crouch = false
+	if (s == 7 || s == 41 || c == 7 || c == 41) {
+		sprint = true
+	}
+	if (s == 17) {
+		crouch = true
+	}
+	body.autoStep = false
+	if ((sprint || crouch) && c == 0) {
+		body.autoStep = true
+	}
+	body.gravityMultiplier = 4.2
+	if (sprint) {
+		body.gravityMultiplier = 2.1
+	}
+	if (crouch) {
+		body.gravityMultiplier = 1.05
+	}
+
 	// jumping
 	var onGround = (body.atRestY() < 0)
 	var canjump = (onGround || state._jumpCount < state.airJumps)
@@ -81,8 +103,9 @@ function applyMovementPhysics(dt, state, body) {
 	}
 
 	// process jump input
-	if (state.jumping) {
-		if (state._isJumping) { // continue previous jump
+	if (!state.jumping || sprint || crouch) {
+			state._isJumping = false
+		} else if (state._isJumping) { // continue previous jump
 			if (state._currjumptime > 0) {
 				var jf = state.jumpForce
 				if (state._currjumptime < dt) jf *= state._currjumptime / dt
@@ -96,9 +119,12 @@ function applyMovementPhysics(dt, state, body) {
 			body.applyImpulse([0, state.jumpImpulse, 0])
 			// clear downward velocity on airjump
 			if (!onGround && body.velocity[1] < 0) body.velocity[1] = 0
-		}
-	} else {
-		state._isJumping = false
+	}
+	if (state.jumpWasPressed && sprint) {
+		body.applyForce([0, state.maxSpeed * 3, 0])
+	}
+	if (state.jumpWasPressed && crouch) {
+		body.applyForce([0, state.maxSpeed * 1.5, 0])
 	}
 
 	// apply movement forces if entity is moving, otherwise just friction
@@ -110,6 +136,14 @@ function applyMovementPhysics(dt, state, body) {
 		// todo: add crouch/sprint modifiers if needed
 		// if (state.sprint) speed *= state.sprintMoveMult
 		// if (state.crouch) speed *= state.crouchMoveMult
+
+		if (sprint) {
+			speed *= 0.5
+		}
+		if (crouch) {
+			speed *= 0.25
+		}
+
 		vec3.set(m, 0, 0, speed)
 
 		// rotate move vector to entity's heading
@@ -141,6 +175,28 @@ function applyMovementPhysics(dt, state, body) {
 		body.friction = state.runningFriction
 	} else {
 		body.friction = state.standingFriction
+	}
+
+	var pos = body.getPosition()
+	if (pos[0] <= 0.2) {
+		body.setPosition([0.2, pos[1], pos[2]])
+		body.velocity[0] = 0
+	}
+	if (pos[0] >= noa.worldSize - 1 - 0.8) {
+		body.setPosition([noa.worldSize - 1 - 0.8, pos[1], pos[2]])
+		body.velocity[0] = 0
+	}
+	if ((pos = body.getPosition())[2] <= 0.2) {
+		body.setPosition([pos[0], pos[1], 0.2])
+		body.velocity[2] = 0
+	}
+	if (pos[2] >= noa.worldSize - 1 - 0.8) {
+		body.setPosition([pos[0], pos[1], noa.worldSize - 1 - 0.8])
+		body.velocity[2] = 0
+	}
+	if (pos[1] <= 0) {
+		body.setPosition([pos[0], 0, pos[2]])
+		body.velocity[1] = 0
 	}
 
 

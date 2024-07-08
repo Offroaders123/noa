@@ -14,11 +14,10 @@ module.exports = function (noa) {
 
 
 		onAdd: function (eid, state) {
-			if (state.mesh) {
-				noa.rendering.addDynamicMesh(state.mesh)
-			} else {
+			if (!state.mesh) {
 				throw new Error('Mesh component added without a mesh - probably a bug!')
 			}
+			noa.rendering.addDynamicMesh(state.mesh)
 			if (!state.offset) {
 				state.offset = new vec3.create()
 			}

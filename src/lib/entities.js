@@ -45,18 +45,18 @@ function Entities(noa, opts) {
 	var shadowDist = opts.shadowDistance
 
 	// register components with the ECS
-	this.names.position = this.createComponent(require('../components/position')(noa))
+	this.names.position = this.createComponent(require('../components/position')(noa)) // unchanged
 	this.names.physics = this.createComponent(require('../components/physics')(noa))
-	this.names.followsEntity = this.createComponent(require('../components/followsEntity')(noa))
+	this.names.followsEntity = this.createComponent(require('../components/followsEntity')(noa)) // unchanged
 	this.names.mesh = this.createComponent(require('../components/mesh')(noa))
 	this.names.shadow = this.createComponent(require('../components/shadow')(noa, shadowDist))
-	this.names.collideTerrain = this.createComponent(require('../components/collideTerrain')(noa))
-	this.names.collideEntities = this.createComponent(require('../components/collideEntities')(noa))
-	this.names.every = this.createComponent(require('../components/every')(noa))
-	this.names.smoothCamera = this.createComponent(require('../components/smoothCamera')(noa))
+	this.names.collideTerrain = this.createComponent(require('../components/collideTerrain')(noa)) // unchanged
+	this.names.collideEntities = this.createComponent(require('../components/collideEntities')(noa)) // unchanged
+	this.names.every = this.createComponent(require('../components/every')(noa)) // unchanged
+	this.names.smoothCamera = this.createComponent(require('../components/smoothCamera')(noa)) // unchanged
 	this.names.movement = this.createComponent(require('../components/movement')(noa))
 	this.names.receivesInputs = this.createComponent(require('../components/receivesInputs')(noa))
-	this.names.fadeOnZoom = this.createComponent(require('../components/fadeOnZoom')(noa))
+	this.names.fadeOnZoom = this.createComponent(require('../components/fadeOnZoom')(noa)) // unchanged
 
 	// decorate the entities object with accessor functions
 	this.isPlayer = function (id) { return id === noa.playerEntity }

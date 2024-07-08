@@ -15,6 +15,7 @@ module.exports = function (noa) {
 
 		state: {
 			body: null,
+			interpolatePosition: true
 		},
 
 
@@ -55,8 +56,11 @@ module.exports = function (noa) {
 
 				// smooth out position update if component is present
 				// (normally set after sudden movements like auto-stepping)
-				if (noa.ents.cameraSmoothed(id)) {
-					vec3.lerp(pos, pdat.renderPosition, pos, 0.3)
+				if (state.interpolatePosition && !state.body.autoStep) {
+					vec3.lerp(pos, pdat.renderPosition, pos, 0.5)
+				}
+				if (noa.ents.cameraSmoothed(id) && state.body.autoStep) {
+					vec3.lerp(pos, pdat.renderPosition, pos, 0.33)
 				}
 
 				// copy values over to renderPosition, 
