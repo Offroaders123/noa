@@ -15,7 +15,7 @@ module.exports = function (noa, opts) {
 
 
 var defaults = {
-	rotationScale: 0.0025,
+	rotationScale: 0.0008,
 	inverseY: false,
 }
 
