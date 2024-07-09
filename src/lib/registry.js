@@ -60,6 +60,7 @@ function Registry(noa, _options) {
     // materials
     this._matIDs = {}           // mat name -> id
     this._matData = []          // mat id -> { color, alpha, texture, textureAlpha }
+    this._textures = []
 
     // register a bunch of ids to seed the property arrays and avoid holes
     for (var i = 1; i <= 32; i++) {
@@ -127,7 +128,6 @@ Registry.prototype.registerBlock = function (id, _options) { // material, proper
 
     // store any custom mesh, and if one is present assume no material
     this._blockMesh[id] = opts.blockMesh || null
-    if (this._blockMesh[id]) opts.material = null
 
     // parse out material parameter
     // always store 6 material IDs per blockID, so material lookup is monomorphic
@@ -200,6 +200,9 @@ Registry.prototype.registerMaterial = function (name, color, textureURL, texHasA
         texture: textureURL ? this._texturePath + textureURL : '',
         textureAlpha: !!texHasAlpha
     }
+    if (textureURL != null) {
+        this._textures[id] = new BABYLON.Texture(this._texturePath + textureURL, this.noa.rendering._scene, false, true, BABYLON.Constants.TEXTURE_NEAREST_NEAREST_MIPNEAREST)
+    }
     return id
 }
 
@@ -270,6 +273,10 @@ function getMaterialId(reg, name, lazyInit) {
 // look up material color given ID
 Registry.prototype.getMaterialColor = function (matID) {
     return this._matData[matID].color
+}
+
+Registry.prototype.getTexture = function (e) {
+    return this._textures[e]
 }
 
 // returns accessor to look up color used for vertices of blocks of given material
