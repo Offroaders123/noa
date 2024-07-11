@@ -1,6 +1,6 @@
 'use strict'
 
-var constants = require('./188.js')
+var constants = require('./constants')
 var ndarray = require('ndarray')
 window.ndarray = ndarray
 
