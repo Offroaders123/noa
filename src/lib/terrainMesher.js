@@ -640,7 +640,7 @@ function GreedyMesher() {
     // construct data for mesh using the masks
 
     function constructMeshDataFromMasks(i, d, u, v, len1, len2,
-        doAO, submeshes, getColor, aoValues, revAoVal, v) {
+        doAO, submeshes, getColor, aoValues, revAoVal, www) {
         var n = 0
         var mask = maskCache
         var aomask = aomaskCache
