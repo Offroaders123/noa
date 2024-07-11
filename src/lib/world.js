@@ -4,7 +4,7 @@ var extend = require('extend')
 var ndarray = require('ndarray')
 var ndHash = require('ndarray-hash')
 var EventEmitter = require('events').EventEmitter
-var Chunk = require('./chunk')
+var Chunk = require('./461.js')
 
 
 module.exports = function (noa, opts) {
@@ -59,6 +59,7 @@ function World(noa, _opts) {
     this._maxChunksPendingMeshing = 20
     this._maxProcessingPerTick = 9 // ms
     this._maxProcessingPerRender = 5 // ms
+    this._blockChanges = 0
 
     // triggers a short visit to the meshing queue before renders
     var self = this
@@ -144,6 +145,7 @@ World.prototype.setBlockID = function (val, x, y, z) {
     x -= i * cs
     y -= j * cs
     z -= k * cs
+    ++this._blockChanges
 
     // if update is on chunk border, update neighbor's padding data too
     _updateChunkAndBorders(this, i, j, k, cs, x, y, z, val)
@@ -399,6 +401,8 @@ function requestNewChunk(world, id) {
     var i = pos[0]
     var j = pos[1]
     var k = pos[2]
+    if (i < -1 || j < -1 || k < -1) return
+    if (i >= world.noa.worldSize / world.chunkSize + 1 || j > 64 / world.chunkSize || k >= world.noa.worldSize / world.chunkSize + 1) return
     var cs = world.chunkSize
     var chunk = new Chunk(world.noa, id, i, j, k, cs)
     setChunk(world, i, j, k, chunk)
