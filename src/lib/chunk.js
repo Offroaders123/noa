@@ -1,6 +1,6 @@
 'use strict'
 
-var constants = require('./constants')
+var constants = require('./188.js')
 var ndarray = require('ndarray')
 window.ndarray = ndarray
 
@@ -9,8 +9,8 @@ module.exports = Chunk
 
 
 // shared references to terrain/object meshers
-var terrainMesher = require('./terrainMesher')
-var objectMesher = require('./objectMesher')
+var terrainMesher = require('./462.js')
+var objectMesher = require('./465.js')
 
 
 

@@ -4,7 +4,7 @@ var extend = require('extend')
 var ndarray = require('ndarray')
 var ndHash = require('ndarray-hash')
 var EventEmitter = require('events').EventEmitter
-var Chunk = require('./461.js')
+var Chunk = require('./chunk')
 
 
 module.exports = function (noa, opts) {
