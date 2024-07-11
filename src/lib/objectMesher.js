@@ -173,7 +173,7 @@ function ObjectMesher() {
                 var key = blockArr[shapeIndex]
                 var dat = blockHash[key]
                 // set global positions for the custom handler, if any
-                particle.position.set(x0 + dat.x + 0.5, y0 + dat.y, z0 + dat.z + 0.5)
+                particle.position.copyFromFloats(x0 + dat.x + 0.5, y0 + dat.y, z0 + dat.z + 0.5)
                 if (handlerFn) handlerFn(particle, x0 + dat.x, y0 + dat.y, z0 + dat.z)
                 // revert to local positions
                 particle.position.x -= x0

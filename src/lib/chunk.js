@@ -10,7 +10,7 @@ module.exports = Chunk
 
 // shared references to terrain/object meshers
 var terrainMesher = require('./terrainMesher')
-var objectMesher = require('./465.js')
+var objectMesher = require('./objectMesher')
 
 
 
