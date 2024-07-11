@@ -24,7 +24,10 @@ var defaults = {
 function makePhysics(noa, opts) {
 	opts = extend({}, defaults, opts)
 	var world = noa.world
-	var blockGetter = function (x, y, z) { return world.getBlockSolidity(x, y, z) }
+	var blockGetter = function (x, y, z) {
+		var id = world.getBlockID(x, y, z)
+		return id != 5 && id != 6 && id != 8 && id != 15 && id != 16 && world.getBlockSolidity(x, y, z)
+	}
 	var isFluidGetter = function (x, y, z) { return world.getBlockFluidity(x, y, z) }
 	var physics = createPhysics(opts, blockGetter, isFluidGetter)
 
