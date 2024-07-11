@@ -1,5 +1,8 @@
 'use strict'
 
+var aa = require('./463.js')
+var bb = require('./189.js')
+var dd = require('./464.js')
 
 
 
@@ -39,6 +42,7 @@ function TerrainMesher() {
         var noa = chunk.noa
 
         // args
+        var f = [chunk.i * chunk.size, chunk.j * chunk.size, chunk.k * chunk.size]
         var array = chunk.array
         var mats = matGetter || noa.registry.getBlockFaceMaterialAccessor()
         var cols = colGetter || noa.registry.getMaterialVertexColorAccessor()
@@ -47,7 +51,7 @@ function TerrainMesher() {
         var rev = isNaN(revAoVal) ? noa.rendering.revAoVal : revAoVal
 
         // greedy mesher creates an array of Submesh structs
-        var subMeshes = greedyMesher.mesh(array, mats, cols, ao, vals, rev)
+        var subMeshes = greedyMesher.mesh(array, mats, cols, ao, vals, rev, f)
 
         // builds the babylon mesh that will be added to the scene
         var mesh
@@ -313,11 +317,30 @@ function MeshBuilder() {
         if (url) {
             var scene = noa.rendering.getScene()
             var tex = new BABYLON.Texture(url, scene, true, false, BABYLON.Texture.NEAREST_SAMPLINGMODE)
+            if (id == 12) {
+                var u = aa(noa)
+                tex = u.texture
+            }
             if (matData.textureAlpha) {
                 tex.hasAlpha = true
                 mat.diffuseTexture = tex
+                if (id == 36) {
+                    if (noa.waterTexture) {
+                        mat.diffuseTexture = noa.waterTexture
+                    } else {
+                        var l = bb(noa)
+                        mat.diffuseTexture = l.texture
+                    }
+                    mat.useAlphaFromDiffuseTexture = true
+                }
+                if (id == 34 || id == 36) {
+                    mat.backFaceCulling = false
+                }
             } else {
                 mat.ambientTexture = tex
+                if (id == 12) {
+                    mat.backFaceCulling = false
+                }
             }
         }
         if (matData.alpha < 1) {
@@ -383,7 +406,7 @@ function GreedyMesher() {
 
 
 
-    this.mesh = function (arr, getMaterial, getColor, doAO, aoValues, revAoVal) {
+    this.mesh = function (arr, getMaterial, getColor, doAO, aoValues, revAoVal, s) {
 
         // return object, holder for Submeshes
         var subMeshes = []
@@ -417,12 +440,12 @@ function GreedyMesher() {
             for (var i = 0; i <= len0; ++i) {
 
                 // fills mask and aomask arrays with values
-                constructMeshMasks(i, d, arrT, getMaterial, aoPackFcn)
+                constructMeshMasks(i, d, arrT, getMaterial, aoPackFcn, s)
                 profile_hook('built masks')
 
                 // parses the masks to do greedy meshing
                 constructMeshDataFromMasks(i, d, u, v, len1, len2,
-                    doAO, subMeshes, getColor, aoValues, revAoVal)
+                    doAO, subMeshes, getColor, aoValues, revAoVal, s)
 
                 profile_hook('build submeshes')
             }
@@ -442,7 +465,7 @@ function GreedyMesher() {
     //
     // iterating across ith 2d plane, with n being index into masks
 
-    function constructMeshMasks(i, d, arrT, getMaterial, aoPackFcn) {
+    function constructMeshMasks(i, d, arrT, getMaterial, aoPackFcn, a) {
         var len = arrT.shape[1]
         var mask = maskCache
         var aomask = aomaskCache
@@ -466,12 +489,40 @@ function GreedyMesher() {
                 var id0 = data[d0]
                 var id1 = data[d0 + istride]
 
-                var faceDir = getFaceDir(id0, id1)
+                var faceDir = getFaceDir(id0, id1, j, k)
                 if (faceDir) {
                     // set regular mask value to material ID, sign indicating direction
                     mask[n] = (faceDir > 0) ?
                         getMaterial(id0 & ID_MASK, d * 2) :
                         -getMaterial(id1 & ID_MASK, d * 2 + 1)
+
+                    if (mask[n] != 0) {
+                        var S = a[0] + i + faceDir
+                        var C = a[1] + j
+                        var P = a[2] + k
+                        if (d == 1) {
+                            S = a[0] + k
+                            C = a[1] + i + faceDir
+                            P = a[2] + j
+                        }
+                        if (d == 2) {
+                            S = a[0] + j
+                            C = a[1] + k
+                            P = a[2] + i + faceDir
+                        }
+                        if (d == 0 && faceDir > 0) {
+                            S -= 1
+                        }
+                        if (d == 1 && faceDir > 0) {
+                            C -= 1
+                        }
+                        if (d == 2 && faceDir > 0) {
+                            P -= 1
+                        }
+                        if (noa.getBrightness(S, C, P) < 1) {
+                            mask[n] += faceDir * 512
+                        }
+                    }
 
                     // if doing AO, precalculate AO level for each face into second mask
                     if (aoPackFcn) {
@@ -540,21 +591,42 @@ function GreedyMesher() {
     }
 
 
-    function getFaceDir(id0, id1) {
+    function getFaceDir(id0, id1, i, n) {
         // no face if both blocks are opaque, or if ids match
-        if (id0 === id1) return 0
         var op0 = id0 & OPAQUE_BIT
         var op1 = id1 & OPAQUE_BIT
         if (op0 && op1) return 0
         // if either block is opaque draw a face for it
         if (op0) return 1
         if (op1) return -1
+        if (id0 === 7 && id1 === 32809) return 0
+        if (id1 === 7 && id0 === 32809) return 0
         // if one block is air or an object block draw face for the other
         if (id1 === 0 || (id1 & OBJECT_BIT)) return 1
         if (id0 === 0 || (id0 & OBJECT_BIT)) return -1
+        if (id1 === 40 || (id1 & OBJECT_BIT)) return 1
+        if (id0 === 40 || (id0 & OBJECT_BIT)) return -1
+        var dir = 0
+        if (id0 == 8206) dir = 1
+        if (id1 == 8206) dir = -1
+        if (id0 == 7) dir = 1
+        if (id1 == 7) dir = -1
+        if (id0 == 7 && id1 == 7) dir = 0
+        if (id0 == 7 && id1 == 8206) dir = -1
+        if (id0 == 8206 && id1 == 7) dir = 1
+        if (id0 == 7 && id1 == 8215) dir = -1
+        if (id0 == 8215 && id1 == 7) dir = 1
+        if (id0 == 17 && id1 == 8206) dir = 1
+        if (id0 == 8206 && id1 == 17) dir = -1
+        if (id0 == 17 && id1 == 8215) dir = 1
+        if (id0 == 8215 && id1 == 17) dir = -1
+        if (id0 == 8206 && id1 == 8206) {
+            dir = 1
+            if (dd(i, n) > 0.5) dir = -1
+        }
         // only remaining case is two different non-opaque non-air blocks that are adjacent
         // really we should draw both faces here; draw neither for now
-        return 0
+        return dir
     }
 
 
@@ -568,7 +640,7 @@ function GreedyMesher() {
     // construct data for mesh using the masks
 
     function constructMeshDataFromMasks(i, d, u, v, len1, len2,
-        doAO, submeshes, getColor, aoValues, revAoVal) {
+        doAO, submeshes, getColor, aoValues, revAoVal, v) {
         var n = 0
         var mask = maskCache
         var aomask = aomaskCache
@@ -583,8 +655,8 @@ function GreedyMesher() {
             var h = 1
             for (var j = 0; j < len1; j += w, n += w) {
 
-                var maskVal = mask[n]
-                if (!maskVal) {
+                var maskVal0 = mask[n]
+                if (!maskVal0) {
                     w = 1
                     continue
                 }
@@ -592,16 +664,20 @@ function GreedyMesher() {
 
                 // Compute width and height of area with same mask/aomask values
                 for (w = 1; w < len1 - j; ++w) {
-                    if (!maskCompareFcn(n + w, mask, maskVal, aomask, ao)) break
+                    if (!maskCompareFcn(n + w, mask, maskVal0, aomask, ao)) break
                 }
 
                 OUTER:
                 for (h = 1; h < len2 - k; ++h) {
                     for (var m = 0; m < w; ++m) {
                         var ix = n + m + h * len1
-                        if (!maskCompareFcn(ix, mask, maskVal, aomask, ao)) break OUTER
+                        if (!maskCompareFcn(ix, mask, maskVal0, aomask, ao)) break OUTER
                     }
                 }
+
+                var maskVal = mask[n]
+                if (maskVal >= 512) maskVal -= 512
+                if (maskVal <= -512) maskVal += 512
 
                 // for testing: doing the following will disable greediness
                 //w=h=1
@@ -612,11 +688,23 @@ function GreedyMesher() {
                 var mesh = submeshes[matID]
                 var colors = mesh.colors
                 var c = getColor(matID)
+                c[0] = 1
+                c[1] = 1
+                c[2] = 1
+                if (maskVal != maskVal0) {
+                    c[0] = 0.6
+                    c[1] = 0.6
+                    c[2] = 0.6
+                }
+
 
                 // colors are pushed in helper function - avoids deopts
                 // tridir is boolean for which way to split the quad into triangles
 
                 var triDir = meshColorFcn(colors, c, ao, aoValues, revAoVal)
+
+                var N = 0
+                if ((matID == 36 || matID == 12) && d == 1 && maskVal > 0) N = 0.07
 
 
                 //Add quad, vertices = x -> x+du -> x+du+dv -> x+dv
@@ -629,15 +717,15 @@ function GreedyMesher() {
 
                 var pos = mesh.positions
                 pos.push(
-                    x[0], x[1], x[2],
-                    x[0] + du[0], x[1] + du[1], x[2] + du[2],
-                    x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2],
-                    x[0] + dv[0], x[1] + dv[1], x[2] + dv[2])
+                    x[0], x[1] - N, x[2],
+                    x[0] + du[0], x[1] + du[1] - N, x[2] + du[2],
+                    x[0] + du[0] + dv[0], x[1] + du[1] + dv[1] - N, x[2] + du[2] + dv[2],
+                    x[0] + dv[0], x[1] + dv[1] - N, x[2] + dv[2])
 
 
                 // add uv values, with the order and sign depending on 
                 // axis and direction so as to avoid mirror-image textures
-                var dir = (maskVal > 0) ? 1 : -1
+                var dir = (maskVal0 > 0) ? 1 : -1
 
                 if (d === 2) {
                     mesh.uvs.push(
@@ -658,7 +746,7 @@ function GreedyMesher() {
 
                 var vs = pos.length / 3 - 4
 
-                if (maskVal < 0) {
+                if (maskVal0 < 0) {
                     if (triDir) {
                         mesh.indices.push(vs, vs + 1, vs + 2, vs, vs + 2, vs + 3)
                     } else {
