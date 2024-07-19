@@ -30,7 +30,7 @@ var PROFILE = 0
 var defaults = {
     showFPS: false,
     antiAlias: true,
-    clearColor: [0.8, 0.9, 1],
+    clearColor: [0.588, 0.835, 1],
     ambientColor: [1, 1, 1],
     lightDiffuse: [1, 1, 1],
     lightSpecular: [1, 1, 1],
@@ -77,7 +77,7 @@ function initScene(self, canvas, opts) {
     if (!BABYLON) throw new Error('BABYLON.js engine not found!')
 
     // init internal properties
-    self._engine = new BABYLON.Engine(canvas, opts.antiAlias)
+    self._engine = new BABYLON.Engine(canvas, opts.antiAlias, undefined, true)
     self._scene = new BABYLON.Scene(self._engine)
     var scene = self._scene
     // remove built-in listeners
@@ -100,7 +100,7 @@ function initScene(self, canvas, opts) {
     // plane obscuring the camera - for overlaying an effect on the whole view
     self._camScreen = BABYLON.Mesh.CreatePlane('camScreen', 10, scene)
     self.addDynamicMesh(self._camScreen)
-    self._camScreen.position.z = .1
+    self._camScreen.position.z = .11
     self._camScreen.parent = self._camera
     self._camScreenMat = self.makeStandardMaterial('camscreenmat')
     self._camScreenMat.specularColor = new col3(0, 0, 0)
@@ -160,38 +160,58 @@ Rendering.prototype.tick = function (dt) {
 
 
 Rendering.prototype.render = function (dt) {
-    profile_hook('start')
+    PROFILE += dt
     updateCamera(this)
-    profile_hook('updateCamera')
     this._engine.beginFrame()
-    profile_hook('beginFrame')
     this._scene.render()
-    profile_hook('render')
+    if (!this.noa.addMode) y(this, PROFILE)
+    if (this.noa.addMode) b(this, PROFILE)
     fps_hook()
     this._engine.endFrame()
-    profile_hook('endFrame')
-    profile_hook('end')
+    if (this.noa.version) {
+        this.noa.version.fps = Math.round(1000 / this._scene.getEngine().getDeltaTime())
+        this.noa.version.chunkUpdates += this.noa.world._blockChanges
+        this.noa.version.redraw()
+        this.noa.world._blockChanges = 0
+    }
+    this.noa.inputs.tick()
 }
 
 Rendering.prototype.resize = function (e) {
     this._engine.resize()
 }
 
-Rendering.prototype.highlightBlockFace = function (show, posArr, normArr) {
+Rendering.prototype.highlightBlockFace = function (show, posArr, normArr, mmm) {
     var m = getHighlightMesh(this)
-    if (show) {
+    if (show && !mmm) {
         // bigger slop when zoomed out
-        var dist = this._currentZoom + glvec3.distance(this.noa.getPlayerEyePosition(), posArr)
-        var slop = 0.001 + 0.001 * dist
+        this._currentZoom
+        glvec3.distance(this.noa.getPlayerEyePosition(), posArr)
+        var slop = 0
         var pos = _highlightPos
         for (var i = 0; i < 3; ++i) {
-            pos[i] = posArr[i] + .5 + ((0.5 + slop) * normArr[i])
+            pos[i] = posArr[i] + .5
         }
         m.position.copyFromFloats(pos[0], pos[1], pos[2])
-        m.rotation.x = (normArr[1]) ? Math.PI / 2 : 0
-        m.rotation.y = (normArr[0]) ? Math.PI / 2 : 0
+        m.setEnabled(true)
+    } else {
+        m.setEnabled(false)
     }
-    m.setEnabled(show)
+    m = drawBlockHiglight(this)
+    if (show && mmm) {
+        this._currentZoom
+        glvec3.distance(this.noa.getPlayerEyePosition(), posArr)
+        slop = 0
+        pos = _highlightPos
+        i = 0
+        for (; i < 3; ++i) {
+            pos[i] = posArr[i] + 0.5 + (1 + slop) * normArr[i]
+        }
+        m.position.copyFromFloats(pos[0], pos[1], pos[2] - 0.5)
+        m.setEnabled(true)
+    } else {
+        m.setEnabled(false)
+    }
 }
 var _highlightPos = glvec3.create()
 
@@ -219,6 +239,10 @@ Rendering.prototype.addDynamicMesh = function (mesh) {
     var i = this._octree.dynamicContent.indexOf(mesh)
     if (i >= 0) return
     this._octree.dynamicContent.push(mesh)
+    for (var i = 0; i < mesh.getChildren().length; i++) {
+        this._octree.dynamicContent.push(mesh.getChildren()[i])
+        mesh.getChildren()[i].useOctreeForCollisions = true
+    }
     var remover = removeUnorderedListItem.bind(null, this._octree.dynamicContent, mesh)
     if (mesh.onDisposeObservable) {
         // the babylon 2.4+ way:
@@ -239,7 +263,7 @@ Rendering.prototype.removeDynamicMesh = function (mesh) {
 
 
 Rendering.prototype.makeMeshInstance = function (mesh, isTerrain) {
-    var m = mesh.createInstance(mesh.name + ' instance' || 'instance')
+    var m = mesh.createInstance(mesh.name + ' instance' || false)
     if (mesh.billboardMode) m.billboardMode = mesh.billboardMode
     if (!isTerrain) {
         // non-terrain stuff should be dynamic w.r.t. selection octrees
@@ -270,6 +294,9 @@ Rendering.prototype.makeStandardMaterial = function (name) {
 
 
 
+Rendering.prototype.makeDynamicStandardMaterial = function (name) {
+    return new BABYLON.StandardMaterial(name, this._scene)
+}
 
 
 
@@ -288,6 +315,7 @@ Rendering.prototype.prepareChunkForRendering = function (chunk) {
     var max = new vec3(chunk.x + cs, chunk.y + cs, chunk.z + cs)
     chunk.octreeBlock = new BABYLON.OctreeBlock(min, max)
     this._octree.blocks.push(chunk.octreeBlock)
+    window.chunk = chunk
 }
 
 Rendering.prototype.disposeChunkForRendering = function (chunk) {
@@ -374,6 +402,13 @@ var _camVec = glvec3.create()
 var _camBox
 var _getVoxel
 
+function y(e, t) {
+    var i = e._highlightMesh
+    if (i) {
+        i.material.alpha = 0.05 + Math.abs(Math.sin(t * 0.005)) * 0.25
+    }
+}
+
 
 
 
@@ -407,18 +442,34 @@ function updateCamera(self) {
 
 function checkCameraEffect(self, id) {
     if (id === self._camLocBlock) return
-    if (id === 0) {
+    if (id === 0 || id === 40) {
         self._camScreen.setEnabled(false)
+        self._scene.fogColor = new BABYLON.Color3(0.9, 0.95, 1)
+        self._scene.fogDensity = self.fogWorld
+        self._scene.clearColor = self._scene.fogColor
     } else {
         var matAccessor = self.noa.registry.getBlockFaceMaterialAccessor()
-        var matId = matAccessor(id, 0)
+        var matId = matAccessor(id, 1)
         var matData = self.noa.registry.getMaterialData(matId)
         var col = matData.color
         var alpha = matData.alpha
         if (col && alpha && alpha < 1) {
-            self._camScreenMat.diffuseColor = new col3(col[0], col[1], col[2])
-            self._camScreenMat.alpha = alpha
-            self._camScreen.setEnabled(true)
+            if (id == 17) {
+                self._camScreenMat.diffuseColor = new col3(0.8, 0, 0)
+                self._camScreenMat.alpha = 0.8
+                self._camScreen.setEnabled(true)
+                self._scene.fogColor = new BABYLON.Color3(0.1, 0, 0)
+                self._scene.fogDensity = self.fogLava
+                self._scene.clearColor = self._scene.fogColor
+            }
+            if (id == 7 || id == 41) {
+                self._camScreenMat.diffuseColor = new col3(0, 0, 0.8)
+                self._camScreenMat.alpha = 0.5
+                self._camScreen.setEnabled(true)
+                self._scene.fogColor = new BABYLON.Color3(0, 0, 0.1)
+                self._scene.fogDensity = self.fogWater
+                self._scene.clearColor = self._scene.fogColor
+            }
         }
     }
     self._camLocBlock = id
@@ -426,6 +477,19 @@ function checkCameraEffect(self, id) {
 
 
 
+function b(e, t) {
+    var i = e._previewMesh
+    if (i) {
+        var n = 0.35 + Math.abs(Math.sin(t * 0.003)) * 0.35
+        i.material.alpha = n
+        i._children[0].material.alpha = n
+        i._children[1].material.alpha = n
+        i._children[2].material.alpha = n
+        i._children[3].material.alpha = n
+        i._children[4].material.alpha = n
+        i._children[6].material.alpha = n
+    }
+}
 
 
 
@@ -433,8 +497,9 @@ function checkCameraEffect(self, id) {
 function getHighlightMesh(rendering) {
     var m = rendering._highlightMesh
     if (!m) {
-        var mesh = BABYLON.Mesh.CreatePlane("highlight", 1.0, rendering._scene)
-        var hlm = rendering.makeStandardMaterial('highlightMat')
+        var mesh = BABYLON.Mesh.CreateBox("highlight", 0.001, rendering._scene)
+        var hlm = rendering.makeDynamicStandardMaterial('highlightMat')
+        hlm.disableLighting = true
         hlm.backFaceCulling = false
         hlm.emissiveColor = new col3(1, 1, 1)
         hlm.alpha = 0.2
@@ -443,14 +508,30 @@ function getHighlightMesh(rendering) {
         // outline
         var s = 0.5
         var lines = BABYLON.Mesh.CreateLines("hightlightLines", [
-            new vec3(s, s, 0),
-            new vec3(s, -s, 0),
-            new vec3(-s, -s, 0),
-            new vec3(-s, s, 0),
-            new vec3(s, s, 0)
+            new vec3(s, s, s),
+            new vec3(s, -s, s),
+            new vec3(-s, -s, s),
+            new vec3(-s, s, s),
+            new vec3(s, s, s),
+            new vec3(s, s, -s),
+            new vec3(s, -s, -s),
+            new vec3(-s, -s, -s),
+            new vec3(-s, s, -s),
+            new vec3(s, s, -s),
+            new vec3(s, s, s),
+            new vec3(s, -s, s),
+            new vec3(s, -s, -s),
+            new vec3(s, s, -s),
+            new vec3(s, s, s),
+            new vec3(-s, s, s),
+            new vec3(-s, -s, s),
+            new vec3(-s, -s, -s),
+            new vec3(-s, s, -s),
+            new vec3(-s, s, s)
         ], rendering._scene)
-        lines.color = new col3(1, 1, 1)
+        lines.color = new col3(0, 0, 0)
         lines.parent = mesh
+        // this line up might be what I modified way early on in Minefork ^^^
 
         rendering.addDynamicMesh(m)
         rendering.addDynamicMesh(lines)
@@ -458,6 +539,89 @@ function getHighlightMesh(rendering) {
     return m
 }
 
+function drawBlockHiglight(e) {
+    function t() {
+        var e = noa.rendering.getScene()
+        var t = Math.PI * 0.25
+        var i = BABYLON.Mesh.CreatePlane('plane1', 1, e)
+        var n = BABYLON.Mesh.CreatePlane('plane2', 1, e)
+        i.rotation.y = t
+        n.rotation.y = Math.PI + t
+        var r = BABYLON.Mesh.CreatePlane('plane3', 1, e)
+        var o = BABYLON.Mesh.CreatePlane('plane4', 1, e)
+        r.rotation.y = -Math.PI * 0.5 + t
+        o.rotation.y = Math.PI * 0.5 + t
+        i.position = new BABYLON.Vector3(0, 0, 0.5)
+        n.position = new BABYLON.Vector3(0, 0, 0.5)
+        r.position = new BABYLON.Vector3(0, 0, 0.5)
+        o.position = new BABYLON.Vector3(0, 0, 0.5)
+        var a = BABYLON.Mesh.MergeMeshes([i, n, r, o])
+        return a
+    }
+    var i = e._previewMesh
+    if (!i) {
+        var n = BABYLON.Mesh.CreatePlane('preview0', 1, e._scene)
+        var r = e.makeDynamicStandardMaterial('previewMat0')
+        r.diffuseTexture = new BABYLON.Texture(null, e._scene)
+        n.material = r
+        var o = BABYLON.Mesh.CreatePlane('preview1', 1, e._scene)
+        var r = e.makeDynamicStandardMaterial('previewMat1')
+        r.diffuseTexture = new BABYLON.Texture(null, e._scene)
+        o.material = r
+        o.parent = n
+        o.rotation.y = Math.PI
+        o.position = new BABYLON.Vector3(0, 0, 1)
+        var a = BABYLON.Mesh.CreatePlane('preview2', 1, e._scene)
+        var r = e.makeDynamicStandardMaterial('previewMat2')
+        r.diffuseTexture = new BABYLON.Texture(null, e._scene)
+        a.material = r
+        a.parent = n
+        a.rotation.y = Math.PI * 0.5
+        a.position = new BABYLON.Vector3(-0.5, 0, 0.5)
+        var s = BABYLON.Mesh.CreatePlane('preview3', 1, e._scene)
+        var r = e.makeDynamicStandardMaterial('previewMat3')
+        r.diffuseTexture = new BABYLON.Texture(null, e._scene)
+        s.material = r
+        s.parent = n
+        s.rotation.y = Math.PI * -0.5
+        s.position = new BABYLON.Vector3(0.5, 0, 0.5)
+        var l = BABYLON.Mesh.CreatePlane('preview4', 1, e._scene)
+        var r = e.makeDynamicStandardMaterial('previewMat4')
+        r.diffuseTexture = new BABYLON.Texture(null, e._scene)
+        l.material = r
+        l.parent = n
+        l.rotation.x = Math.PI * -0.5
+        l.rotation.y = Math.PI
+        l.position = new BABYLON.Vector3(0, -0.5, 0.5)
+        var h = BABYLON.Mesh.CreatePlane('preview5', 1, e._scene)
+        var r = e.makeDynamicStandardMaterial('previewMat5')
+        r.diffuseTexture = new BABYLON.Texture(null, e._scene)
+        h.material = r
+        h.parent = n
+        h.rotation.x = Math.PI * 0.5
+        h.position = new BABYLON.Vector3(0, 0.5, 0.5)
+        var f = 0.5
+        var d = BABYLON.Mesh.CreateLines('previewLines', [new vec3(f, f, f), new vec3(f, -f, f), new vec3(-f, -f, f), new vec3(-f, f, f), new vec3(f, f, f), new vec3(f, f, -f), new vec3(f, -f, -f), new vec3(-f, -f, -f), new vec3(-f, f, -f), new vec3(f, f, -f), new vec3(f, f, f), new vec3(f, -f, f), new vec3(f, -f, -f), new vec3(f, f, -f), new vec3(f, f, f), new vec3(-f, f, f), new vec3(-f, -f, f), new vec3(-f, -f, -f), new vec3(-f, f, -f), new vec3(-f, f, f)], e._scene)
+        d.color = new col3(0, 0, 0)
+        d.position = new BABYLON.Vector3(0, 0, 0.5)
+        d.parent = n
+        var t = t()
+        t.parent = n
+        var r = e.makeStandardMaterial('crossMat')
+        r.diffuseTexture = new BABYLON.Texture(null, e._scene)
+        t.material = r
+        i = e._previewMesh = n
+        e.addDynamicMesh(i)
+        e.addDynamicMesh(o)
+        e.addDynamicMesh(a)
+        e.addDynamicMesh(s)
+        e.addDynamicMesh(l)
+        e.addDynamicMesh(h)
+        e.addDynamicMesh(d)
+        e.addDynamicMesh(t)
+    }
+    return i
+}
 
 
 
@@ -487,7 +651,6 @@ Rendering.prototype.debug_SceneCheck = function () {
     var meshes = this._scene.meshes
     var dyns = this._octree.dynamicContent
     var octs = []
-    var numOcts = 0
     var mats = this._scene.materials
     var allmats = []
     mats.forEach(mat => {
@@ -495,8 +658,7 @@ Rendering.prototype.debug_SceneCheck = function () {
         else allmats.push(mat)
     })
     this._octree.blocks.forEach(function (block) {
-        numOcts++
-        block.entries.forEach(m => octs.push(m))
+        for (var m in block.entries) octs.push(block.entries[m])
     })
     meshes.forEach(function (m) {
         if (m._isDisposed) warn(m, 'disposed mesh in scene')
@@ -526,9 +688,6 @@ Rendering.prototype.debug_SceneCheck = function () {
     octs.forEach(function (m) {
         if (missing(m, meshes)) warn(m, 'octree block mesh not in scene')
     })
-    var avgPerOct = Math.round(10 * octs.length / numOcts) / 10
-    console.log('meshes - octree:', octs.length, '  dynamic:', dyns.length,
-        '   avg meshes/octreeBlock:', avgPerOct)
     function warn(obj, msg) { console.warn(obj.name + ' --- ' + msg) }
     function empty(mesh) { return (mesh.getIndices().length === 0) }
     function missing(obj, list1, list2) {
