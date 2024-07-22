@@ -1,6 +1,6 @@
 'use strict';
 
-var vkey = require('./190.js')
+var vkey = require('vkey')
 var EventEmitter = require('events').EventEmitter;
 // mousewheel polyfill borrowed directly from game-shell
 var addMouseWheel = require("./468.js")
