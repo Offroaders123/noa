@@ -6,13 +6,13 @@ var extend = require('extend')
 var ndarray = require('ndarray')
 var EventEmitter = require('events').EventEmitter
 var createContainer = require('./lib/container')
-var createRendering = require('./lib/rendering')
-var createWorld = require('./lib/world')
-var createInputs = require('./lib/inputs')
+var createRendering = require('./lib/rendering') // rendering.js
+var createWorld = require('./lib/world') // world.js
+var createInputs = require('./lib/inputs') // inputs.js
 var createPhysics = require('./lib/physics')
-var createCamControls = require('./lib/camera')
-var createRegistry = require('./lib/registry')
-var createEntities = require('./lib/entities')
+var createCamControls = require('./lib/camera') // camera.js
+var createRegistry = require('./lib/registry') // registry.js
+var createEntities = require('./lib/entities') // entities.js
 var raycast = require('fast-voxel-raycast')
 
 
@@ -59,6 +59,9 @@ function Engine(opts) {
     this._dragOutsideLock = opts.dragCameraOutsidePointerLock
     var self = this
 
+    this.settings = opts.settings || {}
+    this.addMode = false
+
     // container (html/div) manager
     this.container = createContainer(this, opts)
 
@@ -102,7 +105,7 @@ function Engine(opts) {
 
     // adjust default physics parameters
     var body = ents.getPhysicsBody(this.playerEntity)
-    body.gravityMultiplier = 2 // less floaty
+    body.gravityMultiplier = 4 // less floaty
     body.autoStep = opts.playerAutoStep // auto step onto blocks
 
     /** reference to player entity's physics body */
@@ -117,7 +120,7 @@ function Engine(opts) {
     // movement component - applies movement forces
     // todo: populate movement settings from options
     var moveOpts = {
-        airJumps: 1
+        airJumps: 0
     }
     ents.addComponent(this.playerEntity, ents.names.movement, moveOpts)
 
@@ -157,7 +160,7 @@ function Engine(opts) {
         // the default listener, defined onto noa in case people want to remove it later
         this.defaultBlockHighlightFunction = function (tgt) {
             if (tgt) {
-                self.rendering.highlightBlockFace(true, tgt.position, tgt.normal)
+                self.rendering.highlightBlockFace(true, tgt.position, tgt.normal, self.addMode)
             } else {
                 self.rendering.highlightBlockFace(false)
             }
@@ -174,12 +177,6 @@ function Engine(opts) {
     window.noa = this
     window.ndarray = ndarray
     window.vec3 = vec3
-    var debug = false
-    this.inputs.bind('debug', 'Z')
-    this.inputs.down.on('debug', function onDebug() {
-        debug = !debug
-        if (debug) window.scene.debugLayer.show(); else window.scene.debugLayer.hide();
-    })
 
 
 
@@ -220,7 +217,7 @@ Engine.prototype.tick = function () {
     this.emit('tick', dt)
     profile_hook('tick content')
     profile_hook('end')
-    this.inputs.tick()            // clears accumulated tick/mouseMove data
+    this.entities.tick()
     // debugQueues(this)
 }
 
@@ -267,8 +264,6 @@ Engine.prototype.render = function (framePart) {
         (this._dragOutsideLock && this.inputs.state.fire)) {
         this.cameraControls.updateForRender()
     }
-    // clear cumulative mouse inputs
-    this.inputs.state.dx = this.inputs.state.dy = 0
     // events and render
     this.emit('beforeRender', dt)
     profile_hook_render('before render')
@@ -322,11 +317,9 @@ Engine.prototype.setBlock = function (id, x, y, z) {
 Engine.prototype.addBlock = function (id, x, y, z) {
     // add a new terrain block, if nothing blocks the terrain there
     if (x.length) {
-        if (this.entities.isTerrainBlocked(x[0], x[1], x[2])) return
-        this.world.setBlockID(id, x[0], x[1], x[2])
+        return (!this.entities.isTerrainBlocked(x[0], x[1], x[2]) || id == 7 || id == 17 || !y) && (this.world.setBlockID(id, x[0], x[1], x[2]), true)
     } else {
-        if (this.entities.isTerrainBlocked(x, y, z)) return
-        this.world.setBlockID(id, x, y, z)
+        return (!this.entities.isTerrainBlocked(x, y, z) || id == 7 || id == 17) && (this.world.setBlockID(id, x, y, z), true)
     }
 }
 
@@ -413,6 +406,12 @@ function updateBlockTargets(noa) {
         dat.blockID = noa.world.getBlockID(dat.position[0], dat.position[1], dat.position[2])
         newhash += '|' + result.blockID
         noa.targetedBlock = dat
+        if (dat.position[0] < 0 || dat.position[0] >= noa.worldSize - 1 || dat.position[2] < 0 || dat.position[2] >= noa.worldSize - 1) {
+            noa.targetedBlock = null
+        }
+        if (dat.blockID == 10 && !noa.addMode) {
+            noa.targetedBlock = null
+        }
     } else {
         noa.targetedBlock = null
     }
@@ -431,6 +430,9 @@ var _targetedBlockDat = {
 
 var _prevTargetHash = ''
 
+Engine.prototype.resetTargetBlock = function () {
+    _prevTargetHash = ''
+}
 
 
 
