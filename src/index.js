@@ -1,5 +1,11 @@
 'use strict'
 
+var Buffer = require('buffer/').Buffer
+globalThis.process = { env: {} } // fix for 'game-shell' in ESM
+globalThis.global = globalThis // fix for 'typedarray-pool' in ESM
+globalThis.Buffer = Buffer // fix for 'box-intersect'
+require('babylonjs') // import first, needed for 'rendering.js'
+
 var aabb = require('aabb-3d')
 var vec3 = require('gl-vec3')
 var extend = require('extend')
