@@ -1,9 +1,9 @@
 'use strict';
 
-var vkey = require('vkey')
+var vkey = require('./190.js')
 var EventEmitter = require('events').EventEmitter;
 // mousewheel polyfill borrowed directly from game-shell
-var addMouseWheel = require("./lib/mousewheel-polyfill.js")
+var addMouseWheel = require("./468.js")
 
 module.exports = function(domElement, options) {
   return new Inputs(domElement, options)
@@ -42,6 +42,7 @@ function Inputs(element, opts) {
 
   // state object to be queried
   this.state = {
+    active: true,
     dx: 0, dy: 0, 
     scrollx: 0, scrolly: 0, scrollz: 0
   }
@@ -77,7 +78,7 @@ Inputs.prototype.initEvents = function() {
   this.element.addEventListener("touchmove", onMouseMove.bind(undefined,this), false)
   this.element.addEventListener("touchstart", onTouchStart.bind(undefined,this), false)
   // scroll/mousewheel
-  addMouseWheel(this.element, onMouseWheel.bind(undefined,this), false)
+  addMouseWheel(document, onMouseWheel.bind(undefined,this), false)
 }
 
 
@@ -131,6 +132,7 @@ function onKeyEvent(inputs, wasDown, ev) {
 }
 
 function onMouseEvent(inputs, wasDown, ev) {
+  if (!inputs.state.active) return
   // simulate a code out of range of vkey
   var keycode = -1 - ev.button
   var vkeycode = '<mouse '+ (ev.button+1) +'>' 
@@ -215,6 +217,7 @@ function handleKeyEvent(keycode, vcode, wasDown, inputs, ev) {
   if (inputs.stopPropagation) ev.stopPropagation()
 
   // if the key's state has changed, handle an event for all bindings
+  if (!inputs.state.active) return
   var currstate = inputs._keyStates[keycode]
   if ( XOR(currstate, wasDown) ) {
     // for each binding: emit an event, and update cached state information
