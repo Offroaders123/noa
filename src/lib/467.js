@@ -3,7 +3,7 @@
 var vkey = require('vkey')
 var EventEmitter = require('events').EventEmitter;
 // mousewheel polyfill borrowed directly from game-shell
-var addMouseWheel = require("./468.js")
+var addMouseWheel = require("./lib/mousewheel-polyfill.js")
 
 module.exports = function(domElement, options) {
   return new Inputs(domElement, options)
