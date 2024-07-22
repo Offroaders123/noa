@@ -1,6 +1,6 @@
 'use strict'
 
-var createInputs = require('game-inputs')
+var createInputs = require('./467.js')
 var extend = require('extend')
 
 
@@ -11,16 +11,20 @@ module.exports = function (noa, opts, element) {
 
 var defaultBindings = {
     bindings: {
-        "forward": ["W", "<up>"],
-        "left": ["A", "<left>"],
-        "backward": ["S", "<down>"],
-        "right": ["D", "<right>"],
+        "forward": "W",
+        "left": "A",
+        "backward": "S",
+        "right": "D",
         "fire": "<mouse 1>",
-        "mid-fire": ["<mouse 2>", "Q"],
-        "alt-fire": ["<mouse 3>", "E"],
+        "mid-fire": "<mouse 2>",
+        "alt-fire": "<mouse 3>",
         "jump": "<space>",
-        "sprint": "<shift>",
-        "crouch": "<control>"
+        "build": "E",
+        "chat": "T",
+        "fog": "F",
+        "saveLoc": "<enter>",
+        "loadLoc": "R",
+        "spawnSteve": "G"
     }
 }
 
