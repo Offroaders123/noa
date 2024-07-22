@@ -1,6 +1,6 @@
 'use strict'
 
-var createInputs = require('./467.js')
+var createInputs = require('./_game-inputs.js')
 var extend = require('extend')
 
 
