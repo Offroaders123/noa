@@ -218,6 +218,8 @@ export class Entities extends ECS {
      * ```
      * 
      * @param {number} id
+     * @param {vec3} pos
+     * @returns {void}
      */
     setPosition(id, pos, y = 0, z = 0) {
         if (typeof pos === 'number') pos = [pos, y, z]
@@ -227,9 +229,11 @@ export class Entities extends ECS {
     }
 
     /** Set an entity's size 
+     * @param {number} id
      * @param {number} xs
      * @param {number} ys
      * @param {number} zs
+     * @returns {void}
     */
     setEntitySize(id, xs, ys, zs) {
         var posDat = this.getPositionData(id)
@@ -244,6 +248,8 @@ export class Entities extends ECS {
     /**
      * called when engine rebases its local coords
      * @internal
+     * @param {import("gl-matrix").ReadonlyVec3} delta
+     * @returns {void}
      */
     _rebaseOrigin(delta) {
         for (var state of this.getStatesList(this.names.position)) {
@@ -257,12 +263,21 @@ export class Entities extends ECS {
         }
     }
 
-    /** @internal */
+    /**
+     * @param {number} id
+     * @returns {vec3}
+     * @internal
+     */
     _localGetPosition(id) {
         return this.getPositionData(id)._localPosition
     }
 
-    /** @internal */
+    /**
+     * @param {number} id
+     * @param {vec3} pos
+     * @returns {void}
+     * @internal
+     */
     _localSetPosition(id, pos) {
         var posDat = this.getPositionData(id)
         vec3.copy(posDat._localPosition, pos)
@@ -272,8 +287,11 @@ export class Entities extends ECS {
 
     /** 
      * helper to update everything derived from `_localPosition`
-     * @internal 
-    */
+     * @param {number} id
+     * @param {import("../components/position").PositionState} posDat
+     * @returns {void}
+     * @internal
+     */
     _updateDerivedPositionData(id, posDat) {
         vec3.copy(posDat._renderPosition, posDat._localPosition)
         var offset = this.noa.worldOriginOffset
@@ -302,6 +320,10 @@ export class Entities extends ECS {
     /** 
      * Safely add a component - if the entity already had the 
      * component, this will remove and re-add it.
+     * 
+     * @param {number} id
+     * @param {string} name
+     * @returns {void}
     */
     addComponentAgain(id, name, state) {
         // removes component first if necessary
