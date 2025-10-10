@@ -1,8 +1,8 @@
 declare class DataStore<T extends Record<string, unknown>> {
     list: T[];
     hash: Record<number, T>;
-    _map: Record<number, number>;
-    _pendingRemovals: number[];
+    private _map: Record<number, number>;
+    private _pendingRemovals: number[];
     add(id: number, stateObject: T): void;
     remove(id: number): void;
     dispose(): void;
@@ -12,15 +12,9 @@ export = ECS;
 declare class ECS<T extends Record<string, unknown>> {
     components: Record<string, Component<T>>;
     comps: Record<string, Component<T>>;
-    UID: number;
-    _storage: Record<string, DataStore<T>>;
-    _systems: string[];
-    _renderSystems: string[];
-    _deferrals: {
-        timeout: boolean;
-        removals: any[];
-        multiComps: any[];
-    };
+    private _storage: Record<string, DataStore<T>>;
+    private _systems: string[];
+    private _renderSystems: string[];
     createEntity(compList?: string[]): number;
     deleteEntity(entID: number): this;
     createComponent(compDefn: Component<T>): string;
@@ -36,13 +30,6 @@ declare class ECS<T extends Record<string, unknown>> {
     tick(dt: number): this;
     render(dt: number): this;
     removeMultiComponent(entID: number, compName: string, index: number): this;
-    removeComponent__(entID: number, compName: string): void;
-    removeMultiCompElement(entID: number, def: Component<T>, data: DataStore<T>, index: number): void;
-    pingDeferrals(): void;
-    deferralHandler(): void;
-    doDeferredCleanup(): void;
-    deferredMultiCompCleanup(list: any): void;
-    deferredComponentCleanup(list: any): void;
 }
 declare namespace ECS {
     export { Component };
