@@ -1,5 +1,9 @@
 
 
+/**
+ * @param {import('..').Engine} noa
+ * @returns {{ name: string; order: number; state: { time: number; }; system: () => void; }}
+ */
 export default function (noa) {
 
     var compName = 'smoothCamera'

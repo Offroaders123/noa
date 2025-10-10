@@ -17,6 +17,7 @@ export class PhysicsState {
 /**
  * Physics component, stores an entity's physics engbody.
  * @param {import('..').Engine} noa
+ * @returns {{ name: string; order: number; state: PhysicsState; onAdd: (entID: number) => void; onRemove: (entID: number) => void; system: (dt: number) => void; renderSystem: (dt: number) => void; }}
 */
 
 export default function (noa) {

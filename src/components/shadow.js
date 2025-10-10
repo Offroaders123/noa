@@ -6,7 +6,10 @@ import { CreateDisc } from '@babylonjs/core/Meshes/Builders/discBuilder'
 import '@babylonjs/core/Meshes/instancedMesh'
 
 
-/** @param {import('../index').Engine} noa  */
+/**
+ * @param {import('../index').Engine} noa
+ * @returns {{ name: string; order: number; state: { size: number; }; onAdd: () => void; onRemove: () => void; system: () => void; renderSystem: () => void; }}
+ */
 export default function (noa, distance = 10) {
 
     var shadowDist = distance

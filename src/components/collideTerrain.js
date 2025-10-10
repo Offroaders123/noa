@@ -2,6 +2,7 @@
 
 /**
  * @param {import('../index.js').Engine} noa
+ * @returns {{ name: string; order: number; state: { callback: Function; }; onAdd: (eid: number) => void; onRemove: (eid: number) => void; }}
  */
 export default function (noa) {
     return {

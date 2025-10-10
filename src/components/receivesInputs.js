@@ -4,7 +4,8 @@
  * Input processing component - gets (key) input state and  
  * applies it to receiving entities by updating their movement 
  * component state (heading, movespeed, jumping, etc.)
- * 
+ * @param {import('..').Engine} noa
+ * @returns {{ name: string; order: number; state: object; system: () => void; }}
  */
 
 export default function (noa) {

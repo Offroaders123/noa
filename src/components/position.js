@@ -41,6 +41,7 @@ export class PositionState {
  *  single-source-of-truth position. Others are derived.
  *  Local coords are relative to `noa.worldOriginOffset`.
  * @param {import('..').Engine} noa
+ * @returns {{ name: string; order: number; state: PositionState; onAdd: (eid: number) => void; system: (dt: number) => void; }}
 */
 
 export default function (noa) {

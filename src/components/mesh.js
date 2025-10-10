@@ -4,6 +4,7 @@ import vec3 from 'gl-vec3'
 
 /**
  * @param {import('../index.js').Engine} noa
+ * @returns {{ name: string; order: number; state: object; onAdd: (eid: number) => void; onRemove: () => void; renderSystem: () => void; }}
  */
 export default function (noa) {
     return {

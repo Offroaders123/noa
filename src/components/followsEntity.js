@@ -9,6 +9,7 @@ import vec3 from 'gl-vec3'
 
 /**
  * @param {import('../index.js').Engine} noa
+ * @returns {{ name: string; order: number; state: { entity: number; }; system: () => void; renderSystem: () => void; }}
  */
 export default function (noa) {
 

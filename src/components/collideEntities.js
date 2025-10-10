@@ -24,6 +24,7 @@ import boxIntersect from 'box-intersect'
 
 /**
  * @param {import('../index.js').Engine} noa
+ * @returns {{ name: string; order: number; state: { cylinder: boolean; collideBits: number; collideMask: number; }; system: () => void; }}
  */
 export default function (noa) {
 

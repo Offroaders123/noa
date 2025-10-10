@@ -45,6 +45,7 @@ export function MovementState() {
  * Processor checks state and applies movement/friction/jump forces
  * to the entity's physics body. 
  * @param {import('..').Engine} noa
+ * @returns {{ name: string; order: number; state: MovementState; system: (dt: number) => void; }}
 */
 
 export default function (noa) {
@@ -88,7 +89,7 @@ var zeroVec = vec3.create()
 /**
  * @param {number} dt 
  * @param {MovementState} state 
- * @param {*} body 
+ * @param body 
  * @returns {void}
 */
 

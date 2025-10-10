@@ -6,6 +6,7 @@
 
 /**
  * @param {import('../index.js').Engine} noa
+ * @returns {{ name: string; order: number; state: { cutoff: number; }; system: () => void; }}
  */
 export default function (noa) {
     return {
