@@ -1,4 +1,13 @@
-import type DataStore from "./dataStore.d.ts";
+declare class DataStore<T extends Record<string, unknown>> {
+    list: T[];
+    hash: Record<number, T>;
+    _map: Record<number, number>;
+    _pendingRemovals: number[];
+    add(id: number, stateObject: T): void;
+    remove(id: number): void;
+    dispose(): void;
+    flush(): void;
+}
 export = ECS;
 declare class ECS<T extends Record<string, unknown>> {
     components: Record<string, Component<T>>;
